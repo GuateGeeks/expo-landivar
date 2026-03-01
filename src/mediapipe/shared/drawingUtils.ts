@@ -17,6 +17,43 @@ export function syncCanvasSize(
   }
 }
 
+/**
+ * Draw text that reads correctly on a CSS-mirrored canvas.
+ *
+ * The canvas element uses `transform: scaleX(-1)` so the overlay
+ * matches the mirrored selfie-camera video.  Geometry (boxes,
+ * landmarks) looks fine mirrored, but text becomes backwards.
+ *
+ * This helper temporarily un-mirrors the context, draws the text,
+ * and restores.  The caller passes the *mirrored* x position
+ * (i.e. the position that already looks correct for geometry)
+ * and this function maps it to the un-mirrored coordinate.
+ */
+function drawTextUnmirrored(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  mirroredX: number,
+  y: number,
+): void {
+  ctx.save()
+  ctx.scale(-1, 1)
+  ctx.fillText(text, -mirroredX, y)
+  ctx.restore()
+}
+
+function fillRectUnmirrored(
+  ctx: CanvasRenderingContext2D,
+  mirroredX: number,
+  y: number,
+  width: number,
+  height: number,
+): void {
+  ctx.save()
+  ctx.scale(-1, 1)
+  ctx.fillRect(-mirroredX - width, y, width, height)
+  ctx.restore()
+}
+
 export interface BoundingBox {
   originX: number
   originY: number
@@ -35,12 +72,18 @@ export function drawBoundingBox(
   ctx.strokeRect(box.originX, box.originY, box.width, box.height)
 
   if (label) {
-    ctx.fillStyle = color
     ctx.font = '14px system-ui, sans-serif'
     const textWidth = ctx.measureText(label).width
-    ctx.fillRect(box.originX, box.originY - 20, textWidth + 8, 20)
+    const labelX = box.originX
+    const labelY = box.originY - 20
+
+    // Background rect (un-mirrored so it aligns with text)
+    ctx.fillStyle = color
+    fillRectUnmirrored(ctx, labelX, labelY, textWidth + 8, 20)
+
+    // Label text (un-mirrored so it reads correctly)
     ctx.fillStyle = '#000'
-    ctx.fillText(label, box.originX + 4, box.originY - 5)
+    drawTextUnmirrored(ctx, label, labelX - 4, box.originY - 5)
   }
 }
 
@@ -100,11 +143,43 @@ export function drawTextOverlay(
   for (let i = 0; i < lines.length; i++) {
     const text = lines[i]
     const textWidth = ctx.measureText(text).width
+    const textY = y + i * lineHeight
+
+    // Background (un-mirrored)
     ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'
-    ctx.fillRect(x - 2, y + i * lineHeight - 16, textWidth + 8, 22)
+    fillRectUnmirrored(ctx, x - 2, textY - 16, textWidth + 8, 22)
+
+    // Text (un-mirrored)
     ctx.fillStyle = '#FFFFFF'
-    ctx.fillText(text, x + 2, y + i * lineHeight)
+    drawTextUnmirrored(ctx, text, x - 2, textY)
   }
+}
+
+/**
+ * Draw a text label on an un-mirrored canvas (e.g. segmentation legend).
+ * Exported for task hooks that draw text directly.
+ */
+export function drawLegendText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+): void {
+  drawTextUnmirrored(ctx, text, x, y)
+}
+
+/**
+ * Draw a filled rect on an un-mirrored canvas.
+ * Exported for task hooks that draw rects alongside un-mirrored text.
+ */
+export function drawLegendRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+): void {
+  fillRectUnmirrored(ctx, x, y, width, height)
 }
 
 export function drawSegmentationMask(

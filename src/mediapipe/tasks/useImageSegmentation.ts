@@ -1,6 +1,11 @@
 import { useRef, useCallback } from 'react'
 import { ImageSegmenter, FilesetResolver } from '@mediapipe/tasks-vision'
-import { clearCanvas, syncCanvasSize } from '../shared/drawingUtils.ts'
+import {
+  clearCanvas,
+  syncCanvasSize,
+  drawLegendText,
+  drawLegendRect,
+} from '../shared/drawingUtils.ts'
 import { TASK_META } from '../shared/types.ts'
 
 /** DeepLab v3 category labels (21 Pascal VOC classes). */
@@ -90,7 +95,7 @@ export function useImageSegmentation() {
 
             ctx.putImageData(imageData, 0, 0)
 
-            // Show legend for detected categories
+            // Show legend for detected categories (un-mirrored text)
             if (detectedCategories.size > 0) {
               const legendY = canvas.height - 30 * detectedCategories.size - 10
               let i = 0
@@ -98,10 +103,10 @@ export function useImageSegmentation() {
                 const color = CATEGORY_COLORS[cat % CATEGORY_COLORS.length]
                 const label = CATEGORY_LABELS[cat] ?? `class ${cat}`
                 ctx.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.9)`
-                ctx.fillRect(10, legendY + i * 30, 20, 20)
+                drawLegendRect(ctx, 10, legendY + i * 30, 20, 20)
                 ctx.fillStyle = '#FFFFFF'
                 ctx.font = 'bold 14px system-ui, sans-serif'
-                ctx.fillText(label, 36, legendY + i * 30 + 15)
+                drawLegendText(ctx, label, 36, legendY + i * 30 + 15)
                 i++
               }
             }
