@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MindAR — Image Tracking Demo</title>
+
+    <!-- A-Frame 1.6.0 -->
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <!-- MindAR 1.2.5 — image tracking + A-Frame integration -->
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 10;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        background: rgba(0, 0, 0, 0.6);
+        color: white;
+      }
+
+      .overlay a {
+        color: white;
+        text-decoration: none;
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 0.375rem;
+      }
+
+      .overlay a:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .overlay h1 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0;
+      }
+
+      .instructions {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 10;
+        padding: 1rem;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        text-align: center;
+        font-size: 0.875rem;
+        line-height: 1.5;
+      }
+
+      .instructions a {
+        color: #93c5fd;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Navigation overlay -->
+    <div class="overlay">
+      <a href="/">← Back</a>
+      <h1>MindAR — Image Tracking</h1>
+    </div>
+
+    <!-- Instructions -->
+    <div class="instructions">
+      Point your camera at the
+      <a
+        href="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/card.png"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        MindAR card image
+      </a>
+      to see an augmented overlay. Requires HTTPS or localhost.
+    </div>
+
+    <!--
+      MindAR A-Frame scene: image tracking using the card example.
+      The .mind file is a pre-compiled image target descriptor.
+    -->
+    <a-scene
+      mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/card.mind;"
+      color-space="sRGB"
+      renderer="colorManagement: true; physicallyCorrectLights: true;"
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: false"
+    >
+      <a-assets>
+        <img
+          id="card"
+          src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/card.png"
+          crossorigin="anonymous"
+        />
+        <a-asset-item
+          id="avatarModel"
+          src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/softmind/scene.gltf"
+        ></a-asset-item>
+      </a-assets>
+
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <a-entity mindar-image-target="targetIndex: 0">
+        <!-- Card image overlay -->
+        <a-plane
+          src="#card"
+          position="0 0 0"
+          height="0.552"
+          width="1"
+          rotation="0 0 0"
+        ></a-plane>
+
+        <!-- 3D model on top of the card -->
+        <a-gltf-model
+          rotation="0 0 0"
+          position="0 0 0.1"
+          scale="0.005 0.005 0.005"
+          src="#avatarModel"
+          animation="property: position; to: 0 0.1 0.1; dur: 1000; easing: easeInOutQuad; loop: true; dir: alternate;"
+        ></a-gltf-model>
+      </a-entity>
+    </a-scene>
+  </body>
+</html>

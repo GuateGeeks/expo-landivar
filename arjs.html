@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AR.js — Marker-Based Demo</title>
+
+    <!-- A-Frame 1.6.0 -->
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <!-- AR.js 3.4.7 — marker + location build -->
+    <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.7/aframe/build/aframe-ar.js"></script>
+
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 10;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        background: rgba(0, 0, 0, 0.6);
+        color: white;
+      }
+
+      .overlay a {
+        color: white;
+        text-decoration: none;
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 0.375rem;
+      }
+
+      .overlay a:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .overlay h1 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0;
+      }
+
+      .instructions {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 10;
+        padding: 1rem;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        text-align: center;
+        font-size: 0.875rem;
+        line-height: 1.5;
+      }
+
+      .instructions a {
+        color: #93c5fd;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Navigation overlay -->
+    <div class="overlay">
+      <a href="/">← Back</a>
+      <h1>AR.js — Marker Tracking</h1>
+    </div>
+
+    <!-- Instructions -->
+    <div class="instructions">
+      Point your camera at a
+      <a
+        href="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Hiro marker
+      </a>
+      to see a 3D box. Requires HTTPS or localhost.
+    </div>
+
+    <!-- AR.js A-Frame scene: marker-based with Hiro preset -->
+    <a-scene
+      embedded
+      arjs="sourceType: webcam; debugUIEnabled: false;"
+      vr-mode-ui="enabled: false"
+      renderer="logarithmicDepthBuffer: true; colorManagement: true;"
+    >
+      <a-marker preset="hiro">
+        <!--
+          A simple colored box that rotates slowly.
+          Positioned slightly above the marker so it "sits" on the surface.
+        -->
+        <a-box
+          position="0 0.5 0"
+          material="color: #4f46e5; opacity: 0.85;"
+          scale="1 1 1"
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 4000; easing: linear;"
+        ></a-box>
+      </a-marker>
+
+      <a-entity camera></a-entity>
+    </a-scene>
+  </body>
+</html>

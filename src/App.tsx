@@ -1,33 +1,51 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+const arExperiments = [
+  {
+    title: 'AR.js — Marker Tracking',
+    href: '/arjs.html',
+    description:
+      'Uses AR.js with A-Frame to detect a Hiro marker and display a rotating 3D box. Marker-based tracking is lightweight and works well on low-end devices.',
+    marker: 'Hiro marker (printed or on-screen)',
+    tech: 'A-Frame 1.6.0 + AR.js 3.4.7',
+  },
+  {
+    title: 'MindAR — Image Tracking',
+    href: '/mindar.html',
+    description:
+      'Uses MindAR with A-Frame to detect a card image and overlay a 3D model. Image tracking uses computer vision to recognize natural images without special markers.',
+    marker: 'MindAR card image',
+    tech: 'A-Frame 1.6.0 + MindAR 1.2.5',
+  },
+] as const
 
+function App() {
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
+      <h1>AR Experiments</h1>
       <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
+        Select an augmented reality demo to launch. Each opens a standalone
+        camera experience. Requires HTTPS or localhost.
       </p>
+
+      <div className="card-grid">
+        {arExperiments.map((experiment) => (
+          <a
+            key={experiment.href}
+            href={experiment.href}
+            className="experiment-card"
+          >
+            <h2>{experiment.title}</h2>
+            <p>{experiment.description}</p>
+            <dl>
+              <dt>Target</dt>
+              <dd>{experiment.marker}</dd>
+              <dt>Stack</dt>
+              <dd>{experiment.tech}</dd>
+            </dl>
+          </a>
+        ))}
+      </div>
     </>
   )
 }
