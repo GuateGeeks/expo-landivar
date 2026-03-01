@@ -1,0 +1,248 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "builder",
+  "share": "manual",
+  "autoupdate": true,
+  "watcher": {
+    "ignore": [
+      ".git/**",
+      "node_modules/**",
+      ".vite/**",
+      "dist/**",
+      "coverage/**",
+      "playwright-report/**",
+      "test-results/**",
+      ".turbo/**",
+      ".next/**",
+      "docs/docusaurus/build/**",
+      "docs/research/archive/**"
+    ]
+  },
+  "instructions": [
+    "AGENTS.md",
+    ".opencode/instructions/context-loading.md",
+    ".opencode/instructions/project.md",
+    ".opencode/instructions/bootstrap-spec.md",
+    ".opencode/instructions/socrates-spec.md",
+    ".opencode/instructions/architecture.md",
+    ".opencode/instructions/testing.md",
+    ".opencode/instructions/accessibility.md",
+    ".opencode/instructions/performance.md",
+    ".opencode/instructions/security.md",
+    ".opencode/instructions/versioning.md",
+    ".opencode/instructions/qa-gates.md",
+    ".opencode/rules/engineering.md",
+    ".opencode/rules/implementation-docs.md",
+    "docs/intro.md",
+    "docs/implementation/**/*.md",
+    "docs/research/index.md",
+    "docs/research/product/*.md",
+    "docs/research/frontend/*.md",
+    "docs/research/backend/*.md",
+    "docs/research/ai/*.md",
+    "docs/research/security-privacy/*.md",
+    "docs/research/qa-performance/*.md"
+  ],
+  "compaction": {
+    "auto": true,
+    "prune": true,
+    "reserved": 12000
+  },
+  "permission": {
+    "*": "ask",
+    "doom_loop": "ask",
+    "external_directory": "ask",
+    "webfetch": "ask",
+    "glob": "allow",
+    "grep": "allow",
+    "list": "allow",
+    "task": "allow",
+    "read": {
+      "*": "allow",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "*.env.example": "allow"
+    },
+    "edit": "ask",
+    "bash": {
+      "*": "ask",
+      "git status*": "allow",
+      "git diff*": "allow",
+      "git log*": "allow",
+      "git show*": "allow",
+      "git branch*": "allow",
+      "npm run *": "allow",
+      "npm install*": "ask",
+      "npm ci*": "ask",
+      "npm audit*": "allow",
+      "npm audit fix*": "ask",
+      "npx playwright install*": "ask",
+      "npx *": "allow",
+      "rm *": "deny",
+      "git add*": "allow",
+      "git commit*": "allow",
+      "git push*": "deny",
+      "git reset*": "deny",
+      "git checkout -- *": "deny"
+    }
+  },
+  "formatter": {
+    "prettier": {
+      "command": ["npx", "prettier", "--write", "$FILE"],
+      "extensions": [
+        ".js",
+        ".jsx",
+        ".ts",
+        ".tsx",
+        ".json",
+        ".md",
+        ".yml",
+        ".yaml",
+        ".css"
+      ]
+    }
+  },
+  "agent": {
+    "planner": {
+      "description": "Planning and analysis without changing files",
+      "mode": "primary",
+      "temperature": 0.0,
+      "permission": {
+        "edit": "deny",
+        "bash": "ask",
+        "webfetch": "ask",
+        "task": {
+          "*": "deny",
+          "architect": "allow",
+          "performance": "allow",
+          "a11y": "allow",
+          "qa": "allow",
+          "security": "allow",
+          "doc": "allow",
+          "implementation-docs": "allow",
+          "code-reviewer": "allow"
+        }
+      },
+      "prompt": "You are the Socrates Web planner agent. Produce concrete, small, verifiable plans (trunk-based) and define failing tests first for behavior changes. Never modify files."
+    },
+    "builder": {
+      "description": "Implements changes with verification; no commit/push",
+      "mode": "primary",
+      "temperature": 0.1,
+      "permission": {
+        "edit": "allow",
+        "bash": {
+          "*": "ask",
+          "git status*": "allow",
+          "git diff*": "allow",
+          "git log*": "allow",
+          "git show*": "allow",
+          "git branch*": "allow",
+          "npm run *": "allow",
+          "npm install*": "ask",
+          "npm ci*": "ask",
+          "npm audit*": "allow",
+          "npm audit fix*": "ask",
+          "npx playwright install*": "ask",
+          "npx *": "allow",
+          "rm *": "deny",
+          "git add*": "allow",
+          "git commit*": "allow",
+          "git push*": "deny",
+          "git reset*": "deny",
+          "git checkout -- *": "deny"
+        },
+        "webfetch": "ask",
+        "task": {
+          "*": "deny",
+          "architect": "allow",
+          "performance": "allow",
+          "a11y": "allow",
+          "qa": "allow",
+          "security": "allow",
+          "doc": "allow",
+          "implementation-docs": "allow",
+          "code-reviewer": "allow"
+        }
+      },
+      "prompt": "You are the Socrates Web builder agent. Make small, reversible changes; enforce module boundaries; prioritize accessibility and low-bandwidth performance; run verification commands before finishing."
+    },
+    "architect": {
+      "description": "Architecture guidance and controlled refactors",
+      "mode": "subagent",
+      "temperature": 0.1,
+      "permission": { "edit": "ask", "bash": "deny", "webfetch": "ask" },
+      "prompt": "Propose domain-modular architecture changes and enforce boundaries (no direct module-to-module imports)."
+    },
+    "performance": {
+      "description": "Performance, bundle budgets, and lightweight deps",
+      "mode": "subagent",
+      "temperature": 0.2,
+      "permission": { "edit": "ask", "bash": "ask", "webfetch": "ask" },
+      "prompt": "Optimize for variable networks in Guatemala. Prefer measurable wins, code-splitting, and minimal dependencies."
+    },
+    "a11y": {
+      "description": "Accessibility (WCAG 2.1 AA)",
+      "mode": "subagent",
+      "temperature": 0.1,
+      "permission": { "edit": "ask", "bash": "ask", "webfetch": "ask" },
+      "prompt": "Review and improve semantics, focus, keyboard navigation, labels, and ARIA usage for WCAG 2.1 AA."
+    },
+    "qa": {
+      "description": "QA: lint/typecheck/tests/gates",
+      "mode": "subagent",
+      "temperature": 0.1,
+      "permission": {
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status*": "allow",
+          "git diff*": "allow",
+          "git log*": "allow",
+          "git show*": "allow",
+          "git branch*": "allow",
+          "npm run *": "allow",
+          "npm install*": "ask",
+          "npm ci*": "ask",
+          "npm audit*": "allow",
+          "npx playwright install*": "ask",
+          "npx *": "allow",
+          "rm *": "deny",
+          "git commit*": "deny",
+          "git push*": "deny"
+        },
+        "webfetch": "ask"
+      },
+      "prompt": "Run gates, report failures with root causes, and propose minimal fixes to keep the repo green."
+    },
+    "security": {
+      "description": "Hardening: secrets, risky deps, config",
+      "mode": "subagent",
+      "temperature": 0.1,
+      "permission": { "edit": "ask", "bash": "ask", "webfetch": "ask" },
+      "prompt": "Detect secret exposure, risky dependencies, and insecure frontend patterns; propose mitigations."
+    },
+    "doc": {
+      "description": "Clear and consistent documentation",
+      "mode": "subagent",
+      "temperature": 0.2,
+      "permission": { "edit": "ask", "bash": "deny", "webfetch": "ask" },
+      "prompt": "Create concise docs aligned with actual behavior, boundaries, and verification steps."
+    },
+    "implementation-docs": {
+      "description": "Keeps implementation docs current",
+      "mode": "subagent",
+      "temperature": 0.2,
+      "permission": { "edit": "allow", "bash": "deny", "webfetch": "ask" },
+      "prompt": "Maintain docs/implementation as source-of-truth for current behavior, file pointers, boundaries, and verification commands."
+    },
+    "code-reviewer": {
+      "description": "Read-only reviewer for PR-sized changes",
+      "mode": "subagent",
+      "temperature": 0.1,
+      "permission": { "edit": "deny", "bash": "ask", "webfetch": "deny" },
+      "prompt": "Review correctness, regressions, security, accessibility, performance, and testing quality.",
+      "tools": { "write": false, "edit": false }
+    }
+  }
+}
