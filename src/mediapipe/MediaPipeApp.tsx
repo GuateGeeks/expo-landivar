@@ -3,6 +3,7 @@ import './MediaPipeApp.css'
 import { VISION_TASKS, TASK_META } from './shared/types.ts'
 import type { VisionTaskId } from './shared/types.ts'
 import { useCamera } from './shared/useCamera.ts'
+import { useBroadcast } from './shared/useBroadcast.ts'
 import { useFaceDetection } from './tasks/useFaceDetection.ts'
 import { useFaceLandmark } from './tasks/useFaceLandmark.ts'
 import { useHandLandmark } from './tasks/useHandLandmark.ts'
@@ -21,6 +22,7 @@ export function MediaPipeApp() {
   const [statusMessage, setStatusMessage] = useState('')
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const camera = useCamera()
+  const broadcast = useBroadcast()
 
   // All task hooks
   const faceDetection = useFaceDetection()
@@ -53,6 +55,7 @@ export function MediaPipeApp() {
       task.cleanup()
     }
     camera.stop()
+    broadcast.stopBroadcast()
     setStatus('idle')
     setStatusMessage('')
     // Clear canvas
@@ -61,7 +64,7 @@ export function MediaPipeApp() {
       if (ctx) ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [camera])
+  }, [camera, broadcast])
 
   const handleStart = useCallback(async () => {
     stopAll()
@@ -143,6 +146,16 @@ export function MediaPipeApp() {
     setStatusMessage('New frame captured. Click to segment.')
   }, [camera.videoRef, interactiveSegmentation])
 
+  const handleToggleBroadcast = useCallback(() => {
+    if (broadcast.isBroadcasting) {
+      broadcast.stopBroadcast()
+    } else {
+      const canvas = canvasRef.current
+      if (!canvas) return
+      broadcast.startBroadcast(canvas)
+    }
+  }, [broadcast])
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -199,6 +212,39 @@ export function MediaPipeApp() {
       </div>
 
       <p className="task-description">{taskMeta.description}</p>
+
+      {/* Broadcast controls — only visible when a task is running */}
+      {isRunning && (
+        <div className="broadcast-controls">
+          <div className="broadcast-row">
+            <label className="broadcast-name-label">
+              Name:
+              <input
+                type="text"
+                value={broadcast.displayName}
+                onChange={(e) => broadcast.setDisplayName(e.target.value)}
+                disabled={broadcast.isBroadcasting}
+                className="broadcast-name-input"
+                aria-label="Display name for broadcast"
+              />
+            </label>
+            <button
+              className={broadcast.isBroadcasting ? 'broadcast-btn active' : 'broadcast-btn'}
+              onClick={handleToggleBroadcast}
+            >
+              {broadcast.isBroadcasting ? '⏹ Stop Broadcast' : '📡 Broadcast'}
+            </button>
+          </div>
+          {broadcast.isBroadcasting && (
+            <div className="broadcast-status">
+              <span className="live-badge">🔴 EN VIVO</span>
+              <span className="broadcast-info">
+                Signal: {broadcast.signalingStatus} · Viewers: {broadcast.viewerCount}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="viewport">
         <video
