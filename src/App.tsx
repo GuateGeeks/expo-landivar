@@ -38,6 +38,17 @@ const mlExperiments: DemoCard[] = [
   },
 ]
 
+const liveTools: DemoCard[] = [
+  {
+    title: 'Control Center',
+    href: '/control-center.html',
+    description:
+      'View all connected publishers in real-time. Each publisher runs MediaPipe locally and broadcasts their canvas (video + AI overlay) via WebRTC to this centralized viewer.',
+    marker: 'WebRTC streams from publishers',
+    tech: 'WebRTC P2P + WebSocket Signaling',
+  },
+]
+
 function DemoSection({
   title,
   demos,
@@ -76,6 +87,7 @@ function App() {
       </p>
 
       <DemoSection title="🤖 Machine Learning" demos={mlExperiments} />
+      <DemoSection title="🎛️ Live Tools" demos={liveTools} />
       <DemoSection title="📱 Augmented Reality" demos={arExperiments} />
     </>
   )
