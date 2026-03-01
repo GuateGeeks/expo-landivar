@@ -12,6 +12,7 @@ export default defineConfig({
         arjs: resolve(__dirname, 'arjs.html'),
         mindar: resolve(__dirname, 'mindar.html'),
         mediapipe: resolve(__dirname, 'mediapipe.html'),
+        'control-center': resolve(__dirname, 'control-center.html'),
       },
     },
   },
