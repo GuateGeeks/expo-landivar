@@ -1,6 +1,14 @@
 import './App.css'
 
-const arExperiments = [
+interface DemoCard {
+  title: string
+  href: string
+  description: string
+  marker: string
+  tech: string
+}
+
+const arExperiments: DemoCard[] = [
   {
     title: 'AR.js — Marker Tracking',
     href: '/arjs.html',
@@ -17,35 +25,58 @@ const arExperiments = [
     marker: 'MindAR card image',
     tech: 'A-Frame 1.6.0 + MindAR 1.2.5',
   },
-] as const
+]
 
-function App() {
+const mlExperiments: DemoCard[] = [
+  {
+    title: 'MediaPipe Vision',
+    href: '/mediapipe.html',
+    description:
+      '9 real-time AI vision tasks: face detection, face mesh, hand tracking, gesture recognition, pose detection, object detection, image classification, and segmentation — all running in the browser via WebAssembly.',
+    marker: 'Live camera feed',
+    tech: 'MediaPipe Tasks-Vision 0.10.32 + WASM',
+  },
+]
+
+function DemoSection({
+  title,
+  demos,
+}: {
+  title: string
+  demos: DemoCard[]
+}) {
   return (
-    <>
-      <h1>AR Experiments</h1>
-      <p className="read-the-docs">
-        Select an augmented reality demo to launch. Each opens a standalone
-        camera experience. Requires HTTPS or localhost.
-      </p>
-
+    <section>
+      <h2 className="section-title">{title}</h2>
       <div className="card-grid">
-        {arExperiments.map((experiment) => (
-          <a
-            key={experiment.href}
-            href={experiment.href}
-            className="experiment-card"
-          >
-            <h2>{experiment.title}</h2>
-            <p>{experiment.description}</p>
+        {demos.map((demo) => (
+          <a key={demo.href} href={demo.href} className="experiment-card">
+            <h3>{demo.title}</h3>
+            <p>{demo.description}</p>
             <dl>
-              <dt>Target</dt>
-              <dd>{experiment.marker}</dd>
+              <dt>Input</dt>
+              <dd>{demo.marker}</dd>
               <dt>Stack</dt>
-              <dd>{experiment.tech}</dd>
+              <dd>{demo.tech}</dd>
             </dl>
           </a>
         ))}
       </div>
+    </section>
+  )
+}
+
+function App() {
+  return (
+    <>
+      <h1>GuateGeeks Expo Demos</h1>
+      <p className="read-the-docs">
+        Interactive augmented reality and AI vision demos. Each opens a
+        camera-based experience. Requires HTTPS or localhost.
+      </p>
+
+      <DemoSection title="🤖 Machine Learning" demos={mlExperiments} />
+      <DemoSection title="📱 Augmented Reality" demos={arExperiments} />
     </>
   )
 }

@@ -1,0 +1,169 @@
+.mediapipe-app {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem;
+  text-align: center;
+  font-family: system-ui, sans-serif;
+}
+
+.mediapipe-app h1 {
+  font-size: 1.8rem;
+  margin-bottom: 0.25rem;
+}
+
+.mediapipe-app .subtitle {
+  color: #888;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.controls {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.controls select {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #1a1a1a;
+  color: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+  min-width: 200px;
+}
+
+.controls button {
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: #646cff;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.controls button:hover {
+  background: #535bf2;
+}
+
+.controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.controls button.stop {
+  background: #d32f2f;
+}
+
+.controls button.stop:hover {
+  background: #b71c1c;
+}
+
+.controls button.capture {
+  background: #ff9800;
+}
+
+.controls button.capture:hover {
+  background: #e68900;
+}
+
+.task-description {
+  color: #aaa;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  min-height: 1.2em;
+}
+
+.viewport {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: 640px;
+  background: #111;
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+}
+
+.viewport video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scaleX(-1);
+}
+
+.viewport canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: scaleX(-1);
+  pointer-events: none;
+}
+
+.viewport canvas.interactive {
+  pointer-events: auto;
+  cursor: crosshair;
+}
+
+.status-bar {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  color: #aaa;
+  min-height: 1.5em;
+}
+
+.status-bar.error {
+  color: #f44336;
+}
+
+.status-bar.loading {
+  color: #ff9800;
+}
+
+.status-bar.ready {
+  color: #4caf50;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: #646cff;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.interactive-hint {
+  color: #ff9800;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+@media (prefers-color-scheme: light) {
+  .controls select {
+    background: #f5f5f5;
+    border-color: #ccc;
+  }
+
+  .task-description,
+  .status-bar {
+    color: #666;
+  }
+
+  .viewport {
+    background: #eee;
+  }
+}
