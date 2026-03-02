@@ -124,9 +124,7 @@ export function MediaPipeApp() {
       if (!canvas) return
 
       const rect = canvas.getBoundingClientRect()
-      // Account for the scaleX(-1) transform by mirroring X
-      const rawX = (e.clientX - rect.left) / rect.width
-      const normalizedX = 1 - rawX
+      const normalizedX = (e.clientX - rect.left) / rect.width
       const normalizedY = (e.clientY - rect.top) / rect.height
 
       interactiveSegmentation.segmentAtPoint(

@@ -3,6 +3,7 @@ import { ObjectDetector, FilesetResolver } from '@mediapipe/tasks-vision'
 import {
   clearCanvas,
   syncCanvasSize,
+  drawVideoFrame,
   drawBoundingBox,
 } from '../shared/drawingUtils.ts'
 import { TASK_META } from '../shared/types.ts'
@@ -37,6 +38,7 @@ export function useObjectDetection() {
         if (!detectorRef.current || video.paused || video.ended) return
         syncCanvasSize(canvas, video)
         clearCanvas(ctx)
+        drawVideoFrame(ctx, video)
 
         const result = detectorRef.current.detectForVideo(
           video,

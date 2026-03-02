@@ -7,6 +7,7 @@ import {
 import {
   clearCanvas,
   syncCanvasSize,
+  drawVideoFrame,
   drawTextOverlay,
 } from '../shared/drawingUtils.ts'
 import { TASK_META } from '../shared/types.ts'
@@ -40,6 +41,7 @@ export function useGestureRecognition() {
         if (!recognizerRef.current || video.paused || video.ended) return
         syncCanvasSize(canvas, video)
         clearCanvas(ctx)
+        drawVideoFrame(ctx, video)
 
         const result = recognizerRef.current.recognizeForVideo(
           video,

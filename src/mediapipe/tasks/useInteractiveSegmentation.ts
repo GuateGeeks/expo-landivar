@@ -34,7 +34,11 @@ export function useInteractiveSegmentation() {
       canvas.height = video.videoHeight
       const ctx = canvas.getContext('2d')
       if (!ctx) return
+      // Mirror the video frame for selfie view (matches drawVideoFrame behavior)
+      ctx.translate(canvas.width, 0)
+      ctx.scale(-1, 1)
       ctx.drawImage(video, 0, 0)
+      ctx.setTransform(1, 0, 0, 1, 0, 0)
       setCapturedImage(canvas)
     },
     [],

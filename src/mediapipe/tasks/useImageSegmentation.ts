@@ -3,6 +3,7 @@ import { ImageSegmenter, FilesetResolver } from '@mediapipe/tasks-vision'
 import {
   clearCanvas,
   syncCanvasSize,
+  drawVideoFrame,
   drawLegendText,
   drawLegendRect,
 } from '../shared/drawingUtils.ts'
@@ -79,8 +80,18 @@ export function useImageSegmentation() {
             const mask = result.categoryMask.getAsUint8Array()
             const width = result.categoryMask.width
             const height = result.categoryMask.height
-            const imageData = ctx.createImageData(width, height)
+            // Draw video frame first so captureStream gets video + overlay
+            drawVideoFrame(ctx, video)
 
+            // Build mask overlay on a temp canvas so putImageData doesn't
+            // overwrite the video frame (putImageData ignores compositing)
+            const overlayCanvas = document.createElement('canvas')
+            overlayCanvas.width = width
+            overlayCanvas.height = height
+            const overlayCtx = overlayCanvas.getContext('2d')
+            if (!overlayCtx) return
+
+            const imageData = overlayCtx.createImageData(width, height)
             const detectedCategories = new Set<number>()
 
             for (let i = 0; i < mask.length; i++) {
@@ -93,7 +104,8 @@ export function useImageSegmentation() {
               imageData.data[i * 4 + 3] = color[3]
             }
 
-            ctx.putImageData(imageData, 0, 0)
+            overlayCtx.putImageData(imageData, 0, 0)
+            ctx.drawImage(overlayCanvas, 0, 0, canvas.width, canvas.height)
 
             // Show legend for detected categories (un-mirrored text)
             if (detectedCategories.size > 0) {

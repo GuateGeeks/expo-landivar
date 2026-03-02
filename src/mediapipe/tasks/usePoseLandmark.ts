@@ -4,7 +4,7 @@ import {
   FilesetResolver,
   DrawingUtils,
 } from '@mediapipe/tasks-vision'
-import { clearCanvas, syncCanvasSize } from '../shared/drawingUtils.ts'
+import { clearCanvas, syncCanvasSize, drawVideoFrame } from '../shared/drawingUtils.ts'
 import { TASK_META } from '../shared/types.ts'
 
 export function usePoseLandmark() {
@@ -35,6 +35,7 @@ export function usePoseLandmark() {
         if (!landmarkerRef.current || video.paused || video.ended) return
         syncCanvasSize(canvas, video)
         clearCanvas(ctx)
+        drawVideoFrame(ctx, video)
 
         const result = landmarkerRef.current.detectForVideo(
           video,

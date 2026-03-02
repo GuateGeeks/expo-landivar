@@ -1,6 +1,9 @@
 /** Lightweight drawing helpers for MediaPipe task results on a canvas overlay. */
 
 export function clearCanvas(ctx: CanvasRenderingContext2D): void {
+  // Reset any lingering transform (e.g. the mirror set by drawVideoFrame)
+  // so clearRect covers the full canvas and the next frame starts clean.
+  ctx.setTransform(1, 0, 0, 1, 0, 0)
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 }
 
@@ -18,43 +21,76 @@ export function syncCanvasSize(
 }
 
 /**
- * Draw text that reads correctly on a CSS-mirrored canvas.
+ * Draw the current video frame onto the canvas (mirrored for selfie view)
+ * and set a persistent mirror transform so all subsequent overlay drawing
+ * aligns with the mirrored video.
  *
- * The canvas has CSS `transform: scaleX(-1)`.  We counter-flip with
- * `ctx.scale(-1, 1)` so text reads normally.  In that un-mirrored
- * context the x-axis is inverted, so visual-left margin `m` maps to
- * `-(canvasWidth - m)`.
+ * Previously the canvas used CSS `scaleX(-1)` to mirror, but that meant
+ * `captureStream()` captured un-mirrored pixels — the Control Center saw
+ * raw canvas content without the CSS transform. By mirroring in canvas
+ * drawing code instead, `captureStream()` captures exactly what the user sees.
  *
- * @param screenX  The desired visual x position (0 = left edge).
+ * After this call the context has `translate(w, 0) + scale(-1, 1)` active,
+ * so all coordinate-based drawing (landmarks, boxes) is automatically mirrored.
+ * Text helpers temporarily reset to identity to draw readable text.
  */
-function drawTextUnmirrored(
+export function drawVideoFrame(
   ctx: CanvasRenderingContext2D,
-  text: string,
-  screenX: number,
-  y: number,
+  video: HTMLVideoElement,
 ): void {
   const w = ctx.canvas.width
+  const h = ctx.canvas.height
+
+  // Mirror transform: flip horizontally around canvas center
   ctx.save()
+  ctx.translate(w, 0)
   ctx.scale(-1, 1)
-  // In the flipped context, visual-left x maps to -(w - x)
-  ctx.fillText(text, -(w - screenX), y)
+  ctx.drawImage(video, 0, 0, w, h)
+  ctx.restore()
+
+  // Set persistent mirror transform for all subsequent overlay drawing.
+  // This ensures landmarks, boxes, etc. align with the mirrored video.
+  ctx.translate(w, 0)
+  ctx.scale(-1, 1)
+}
+
+/**
+ * Draw readable text at a specific pixel position.
+ *
+ * Temporarily resets the transform to identity so text is not affected
+ * by the mirror transform set by drawVideoFrame.
+ *
+ * @param pixelX  The pixel x position (0 = left edge of canvas).
+ * @param pixelY  The pixel y position.
+ */
+function drawTextAtPixel(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  pixelX: number,
+  pixelY: number,
+): void {
+  ctx.save()
+  ctx.setTransform(1, 0, 0, 1, 0, 0)
+  ctx.fillText(text, pixelX, pixelY)
   ctx.restore()
 }
 
-function fillRectUnmirrored(
+/**
+ * Draw a filled rect at a specific pixel position.
+ *
+ * Temporarily resets the transform to identity so the rect is not affected
+ * by the mirror transform.
+ */
+function fillRectAtPixel(
   ctx: CanvasRenderingContext2D,
-  screenX: number,
-  y: number,
+  pixelX: number,
+  pixelY: number,
   width: number,
   height: number,
 ): void {
-  const w = ctx.canvas.width
   ctx.save()
-  ctx.scale(-1, 1)
-  // Rect left edge at visual screenX → flipped x = -(w - screenX)
-  // fillRect draws rightward, but x-axis is flipped so it extends
-  // visually leftward — offset by -width so the rect starts at screenX.
-  ctx.fillRect(-(w - screenX) - width, y, width, height)
+  ctx.setTransform(1, 0, 0, 1, 0, 0)
+  ctx.fillRect(pixelX, pixelY, width, height)
   ctx.restore()
 }
 
@@ -71,6 +107,7 @@ export function drawBoundingBox(
   label?: string,
   color = '#00FF00',
 ): void {
+  // strokeRect runs through the mirror transform — box aligns with mirrored video
   ctx.strokeStyle = color
   ctx.lineWidth = 2
   ctx.strokeRect(box.originX, box.originY, box.width, box.height)
@@ -78,19 +115,20 @@ export function drawBoundingBox(
   if (label) {
     ctx.font = '14px system-ui, sans-serif'
     const textWidth = ctx.measureText(label).width
+    const w = ctx.canvas.width
 
-    // Position label above the box, visually left-aligned to box edge.
-    // box.originX is in canvas coords; CSS mirror flips it, so the
-    // visual position of the box left edge = canvasWidth - box.originX.
-    const visualX = ctx.canvas.width - box.originX - box.width
+    // Convert box origin from mirrored coords to pixel coords.
+    // Mirror transform maps coord x -> pixel (w - x).
+    // The box visual left edge in pixels = w - originX - box.width
+    const pixelLeft = w - box.originX - box.width
 
     // Background rect
     ctx.fillStyle = color
-    fillRectUnmirrored(ctx, visualX, box.originY - 20, textWidth + 8, 20)
+    fillRectAtPixel(ctx, pixelLeft, box.originY - 20, textWidth + 8, 20)
 
     // Label text
     ctx.fillStyle = '#000'
-    drawTextUnmirrored(ctx, label, visualX + 4, box.originY - 5)
+    drawTextAtPixel(ctx, label, pixelLeft + 4, box.originY - 5)
   }
 }
 
@@ -152,19 +190,19 @@ export function drawTextOverlay(
     const textWidth = ctx.measureText(text).width
     const textY = y + i * lineHeight
 
-    // Background (un-mirrored, pinned to visual left)
+    // Background (pinned to visual left)
     ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'
-    fillRectUnmirrored(ctx, x - 2, textY - 16, textWidth + 8, 22)
+    fillRectAtPixel(ctx, x - 2, textY - 16, textWidth + 8, 22)
 
-    // Text (un-mirrored, pinned to visual left)
+    // Text (pinned to visual left)
     ctx.fillStyle = '#FFFFFF'
-    drawTextUnmirrored(ctx, text, x + 2, textY)
+    drawTextAtPixel(ctx, text, x + 2, textY)
   }
 }
 
 /**
- * Draw a text label on an un-mirrored canvas (e.g. segmentation legend).
- * @param x  Visual x position (0 = left edge of viewport).
+ * Draw a text label at a pixel position.
+ * @param x  Pixel x position (0 = left edge of canvas).
  */
 export function drawLegendText(
   ctx: CanvasRenderingContext2D,
@@ -172,12 +210,12 @@ export function drawLegendText(
   x: number,
   y: number,
 ): void {
-  drawTextUnmirrored(ctx, text, x, y)
+  drawTextAtPixel(ctx, text, x, y)
 }
 
 /**
- * Draw a filled rect on an un-mirrored canvas.
- * @param x  Visual x position (0 = left edge of viewport).
+ * Draw a filled rect at a pixel position.
+ * @param x  Pixel x position (0 = left edge of canvas).
  */
 export function drawLegendRect(
   ctx: CanvasRenderingContext2D,
@@ -186,7 +224,7 @@ export function drawLegendRect(
   width: number,
   height: number,
 ): void {
-  fillRectUnmirrored(ctx, x, y, width, height)
+  fillRectAtPixel(ctx, x, y, width, height)
 }
 
 export function drawSegmentationMask(
