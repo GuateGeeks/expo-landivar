@@ -4,6 +4,8 @@
 
 A single-page React application with a dropdown task switcher that lets users run 9 different MediaPipe vision AI tasks in real-time using their device camera. All inference runs client-side via WebAssembly — no server required.
 
+Includes an optional **broadcast mode** that streams the canvas (video + AI overlay) to the [Control Center](./control-center.md) via WebRTC.
+
 ### Supported Tasks
 
 | # | Task | Input | Visual Output |
@@ -24,10 +26,11 @@ A single-page React application with a dropdown task switcher that lets users ru
 |------|---------|
 | `mediapipe.html` | MPA entry point (minimal HTML shell) |
 | `src/mediapipe/main.tsx` | React entry — mounts `MediaPipeApp` |
-| `src/mediapipe/MediaPipeApp.tsx` | Main component: task switcher, camera viewport, status bar |
-| `src/mediapipe/MediaPipeApp.css` | Page styles |
+| `src/mediapipe/MediaPipeApp.tsx` | Main component: task switcher, camera viewport, broadcast toggle, status bar |
+| `src/mediapipe/MediaPipeApp.css` | Page styles (includes broadcast control styles) |
 | `src/mediapipe/shared/types.ts` | Task IDs, metadata, model URLs |
 | `src/mediapipe/shared/useCamera.ts` | Shared camera stream hook (`getUserMedia`) |
+| `src/mediapipe/shared/useBroadcast.ts` | WebRTC broadcast hook (signaling + peer management) |
 | `src/mediapipe/shared/drawingUtils.ts` | Canvas drawing helpers (boxes, landmarks, connectors, masks, text) |
 | `src/mediapipe/tasks/useFaceDetection.ts` | Face detection hook |
 | `src/mediapipe/tasks/useFaceLandmark.ts` | Face landmark hook |
@@ -73,6 +76,16 @@ This task only supports `IMAGE` running mode (not `VIDEO`). The implementation:
 3. On click, computes normalized coordinates and runs `segment()` with a keypoint
 4. Renders a confidence mask overlay with a yellow click indicator
 
+### Broadcast mode (integrated publisher)
+
+Broadcasting is a toggle inside `MediaPipeApp` — not a separate page. When a task is running, the user can click "📡 Broadcast" to:
+1. Capture the canvas stream at 15 fps via `canvas.captureStream(15)`
+2. Connect to the signaling server as a `publisher`
+3. Respond to SDP offers from viewers with WebRTC answers
+4. Display a "🔴 EN VIVO" indicator with viewer count
+
+The `useBroadcast` hook handles signaling and peer connection lifecycle. See [Control Center docs](./control-center.md) for the full architecture.
+
 ## Dependencies
 
 | Package | Version | Purpose |
@@ -117,6 +130,13 @@ npm run build
    - **Image Segmentation**: Colored overlay with legend
    - **Interactive Segmentation**: Click on captured image → purple mask overlay
 
+### Broadcast verification
+
+1. Start the signaling server: `npm run dev:signaling`
+2. Open `/mediapipe.html`, start any task
+3. Click "📡 Broadcast" → should see "🔴 EN VIVO"
+4. Open `/control-center.html` in another tab → publisher should appear
+
 ## Requirements
 
 - Device with camera access
@@ -126,4 +146,4 @@ npm run build
 
 ## Status
 
-Implemented — all 9 vision tasks functional.
+Implemented — all 9 vision tasks functional, with optional WebRTC broadcast mode.
