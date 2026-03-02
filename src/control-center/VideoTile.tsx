@@ -15,7 +15,16 @@ export function VideoTile({ stream }: VideoTileProps) {
     const video = videoRef.current
     if (!video) return
 
-    video.srcObject = stream
+    if (stream) {
+      video.srcObject = stream
+      // Explicit play() — autoPlay attribute alone is unreliable
+      // when srcObject is assigned after initial render
+      video.play().catch(() => {
+        // Autoplay blocked — user interaction required
+      })
+    } else {
+      video.srcObject = null
+    }
   }, [stream])
 
   return (

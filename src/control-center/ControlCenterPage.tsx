@@ -20,7 +20,7 @@ interface Tile {
 }
 
 export function ControlCenterPage() {
-  const [viewerId] = useState(() => getOrCreateClientId())
+  const [viewerId] = useState(() => getOrCreateClientId('viewer'))
 
   const [tiles, setTiles] = useState<Record<string, Tile>>({})
   const [signalingStatus, setSignalingStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting')
@@ -84,8 +84,10 @@ export function ControlCenterPage() {
     }
 
     pc.ontrack = (event) => {
-      const [stream] = event.streams
-      if (stream) setStream(publisherId, stream)
+      // event.streams may be empty depending on how the publisher added tracks.
+      // Fall back to wrapping the track in a new MediaStream.
+      const stream = event.streams[0] ?? new MediaStream([event.track])
+      setStream(publisherId, stream)
     }
 
     // Must add a transceiver so the offer includes media lines
@@ -140,6 +142,8 @@ export function ControlCenterPage() {
   }, [viewerId, upsertTile, startOffer, markOffline, closePeer])
 
   // Connect to signaling server
+  // All callback deps (upsertTile, startOffer, etc.) have stable identities,
+  // so handleMessage is stable and this effect runs once on mount.
   useEffect(() => {
     const signaling = new SignalingClient({
       url: SIGNALING_URL,
@@ -161,20 +165,21 @@ export function ControlCenterPage() {
       peers.forEach((pc) => pc.close())
       peers.clear()
     }
-  }, [viewerId, handleMessage])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewerId])
 
   const tileList = Object.values(tiles)
   const onlineCount = tileList.filter((t) => t.status === 'online').length
 
   return (
     <div className="control-center">
-      <a href="/" className="back-link">← Back to demos</a>
+      <a href="/" className="back-link">\u2190 Back to demos</a>
       <h1>Control Center</h1>
       <p className="subtitle">Live feeds from connected MediaPipe publishers</p>
 
       <div className="status-row">
         <span className={`signal-badge ${signalingStatus}`}>
-          {signalingStatus === 'connected' ? '🟢' : signalingStatus === 'connecting' ? '🟡' : '🔴'}{' '}
+          {signalingStatus === 'connected' ? '\ud83d\udfe2' : signalingStatus === 'connecting' ? '\ud83d\udfe1' : '\ud83d\udd34'}{' '}
           {signalingStatus}
         </span>
         <span className="info-badge">Room: {ROOM_ID}</span>
@@ -196,7 +201,7 @@ export function ControlCenterPage() {
               <div className="tile-header">
                 <div>
                   <div className="tile-name">{tile.displayName}</div>
-                  <div className="tile-id">{tile.clientId.slice(0, 8)}…</div>
+                  <div className="tile-id">{tile.clientId.slice(0, 8)}\u2026</div>
                 </div>
                 <span className={`tile-status ${tile.status}`}>{tile.status}</span>
               </div>

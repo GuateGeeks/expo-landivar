@@ -35,7 +35,7 @@ export interface BroadcastState {
  * adds the canvas stream tracks, and sends back an SDP answer.
  */
 export function useBroadcast(): BroadcastState {
-  const clientIdRef = useRef(getOrCreateClientId())
+  const clientIdRef = useRef(getOrCreateClientId('publisher'))
   const clientId = clientIdRef.current
 
   const [isBroadcasting, setIsBroadcasting] = useState(false)
