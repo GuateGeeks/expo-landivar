@@ -20,11 +20,10 @@ interface Tile {
 }
 
 export function ControlCenterPage() {
-  const viewerIdRef = useRef(getOrCreateClientId())
-  const viewerId = viewerIdRef.current
+  const [viewerId] = useState(() => getOrCreateClientId())
 
   const [tiles, setTiles] = useState<Record<string, Tile>>({})
-  const [signalingStatus, setSignalingStatus] = useState<'connecting' | 'connected' | 'disconnected'>('disconnected')
+  const [signalingStatus, setSignalingStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting')
 
   const peersRef = useRef(new Map<string, RTCPeerConnection>())
   const signalingRef = useRef<SignalingClient | null>(null)
@@ -153,14 +152,14 @@ export function ControlCenterPage() {
     })
 
     signalingRef.current = signaling
-    setSignalingStatus('connecting')
     signaling.connect()
 
+    const peers = peersRef.current
     return () => {
       signaling.close()
       signalingRef.current = null
-      peersRef.current.forEach((pc) => pc.close())
-      peersRef.current.clear()
+      peers.forEach((pc) => pc.close())
+      peers.clear()
     }
   }, [viewerId, handleMessage])
 

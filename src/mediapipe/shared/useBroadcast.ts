@@ -155,11 +155,14 @@ export function useBroadcast(): BroadcastState {
 
   // Cleanup on unmount
   useEffect(() => {
+    const peers = peersRef.current
+    const outStream = outStreamRef.current
+    const signaling = signalingRef.current
     return () => {
-      peersRef.current.forEach((pc) => pc.close())
-      peersRef.current.clear()
-      outStreamRef.current?.getTracks().forEach((t) => t.stop())
-      signalingRef.current?.close()
+      peers.forEach((pc) => pc.close())
+      peers.clear()
+      outStream?.getTracks().forEach((t) => t.stop())
+      signaling?.close()
     }
   }, [])
 
