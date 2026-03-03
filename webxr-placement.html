@@ -191,8 +191,9 @@
         id="magnemite"
         src="#magnemite-model"
         position="0 0 -2"
-        rotation="0 180 0"
-        scale="0.5 0.5 0.5"
+        rotation="0 0 0"
+        scale="0.05 0.05 0.05"
+        play-gltf-animation="clip: Take 001"
         visible="false"
       ></a-gltf-model>
 
@@ -200,6 +201,44 @@
     </a-scene>
 
     <script>
+      if (!AFRAME.components["play-gltf-animation"]) {
+        AFRAME.registerComponent("play-gltf-animation", {
+          schema: {
+            clip: { type: "string" },
+          },
+          init() {
+            this.mixer = null;
+            this.action = null;
+
+            this.el.addEventListener("model-loaded", (event) => {
+              const model = event.detail.model;
+              const clips = event.detail.animations || [];
+              if (!model || clips.length === 0) {
+                return;
+              }
+
+              const clipName = this.data.clip;
+              const clip =
+                clips.find((item) => item.name === clipName) ?? clips[0];
+              if (!clip) {
+                return;
+              }
+
+              this.mixer = new AFRAME.THREE.AnimationMixer(model);
+              this.action = this.mixer.clipAction(clip);
+              this.action.play();
+            });
+          },
+          tick(_, delta) {
+            if (!this.mixer || !delta) {
+              return;
+            }
+
+            this.mixer.update(delta / 1000);
+          },
+        });
+      }
+
       if (!AFRAME.components["custom-hit-test"]) {
         AFRAME.registerComponent("custom-hit-test", {
         init() {
