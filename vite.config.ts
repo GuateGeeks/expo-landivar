@@ -11,7 +11,7 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, "index.html"),
         arjs: resolve(__dirname, "arjs.html"),
-        "arjs-placement": resolve(__dirname, "arjs-placement.html"),
+        "aframe-placement": resolve(__dirname, "aframe-placement.html"),
         mindar: resolve(__dirname, "mindar.html"),
         "webxr-placement": resolve(__dirname, "webxr-placement.html"),
         mediapipe: resolve(__dirname, "mediapipe.html"),

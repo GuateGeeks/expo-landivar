@@ -120,7 +120,8 @@
     <!-- Instructions -->
     <div class="instructions">
       Start AR, aim at the floor, and tap Place when the reticle appears.
-      Works best on modern Android devices with WebXR support.
+      Works best on modern Android devices with WebXR support. No headset
+      required.
       <p class="status" id="status">Checking WebXR support...</p>
       <div class="actions">
         <button id="start-ar" type="button">Start AR</button>
@@ -133,7 +134,7 @@
       embedded
       renderer="colorManagement: true; physicallyCorrectLights: true; alpha: true"
       vr-mode-ui="enabled: false"
-      webxr="optionalFeatures: dom-overlay; overlayElement: #overlay;"
+      webxr="requiredFeatures: hit-test; optionalFeatures: dom-overlay, local-floor; overlayElement: #overlay;"
     >
       <a-assets>
         <a-asset-item
@@ -167,42 +168,77 @@
     </a-scene>
 
     <script>
-      AFRAME.registerComponent("ground-reticle", {
+      AFRAME.registerComponent("ar-hit-test", {
         init() {
           this.reticle = document.getElementById("reticle");
-          this.raycaster = new AFRAME.THREE.Raycaster();
-          this.center = new AFRAME.THREE.Vector2(0, 0);
-          this.plane = new AFRAME.THREE.Plane(
-            new AFRAME.THREE.Vector3(0, 1, 0),
-            0,
-          );
-          this.intersection = new AFRAME.THREE.Vector3();
-          this.camera = this.el.sceneEl.camera;
+          this.hitTestSource = null;
+          this.referenceSpace = null;
 
-          this.el.sceneEl.addEventListener("camera-set-active", () => {
-            this.camera = this.el.sceneEl.camera;
+          const renderer = this.el.sceneEl.renderer;
+          if (!renderer || !renderer.xr) {
+            return;
+          }
+
+          renderer.xr.addEventListener("sessionstart", () => {
+            const session = renderer.xr.getSession();
+            if (!session) {
+              return;
+            }
+
+            session.requestReferenceSpace("viewer").then((viewerSpace) => {
+              session
+                .requestHitTestSource({ space: viewerSpace })
+                .then((source) => {
+                  this.hitTestSource = source;
+                })
+                .catch(() => {
+                  this.hitTestSource = null;
+                });
+            });
+
+            this.referenceSpace = renderer.xr.getReferenceSpace();
+          });
+
+          renderer.xr.addEventListener("sessionend", () => {
+            this.hitTestSource = null;
+            this.referenceSpace = null;
+            if (this.reticle) {
+              this.reticle.object3D.visible = false;
+            }
           });
         },
         tick() {
-          if (!this.reticle || !this.camera || !this.el.sceneEl.is("ar-mode")) {
+          if (!this.reticle || !this.hitTestSource || !this.referenceSpace) {
             if (this.reticle) {
               this.reticle.object3D.visible = false;
             }
             return;
           }
 
-          this.raycaster.setFromCamera(this.center, this.camera);
-          const hit = this.raycaster.ray.intersectPlane(
-            this.plane,
-            this.intersection,
-          );
-
-          if (hit) {
-            this.reticle.object3D.position.copy(this.intersection);
-            this.reticle.object3D.visible = true;
-          } else {
-            this.reticle.object3D.visible = false;
+          const frame = this.el.sceneEl.frame;
+          if (!frame) {
+            return;
           }
+
+          const hitTestResults = frame.getHitTestResults(this.hitTestSource);
+          if (hitTestResults.length === 0) {
+            this.reticle.object3D.visible = false;
+            return;
+          }
+
+          const hit = hitTestResults[0];
+          const pose = hit.getPose(this.referenceSpace);
+          if (!pose) {
+            this.reticle.object3D.visible = false;
+            return;
+          }
+
+          this.reticle.object3D.position.set(
+            pose.transform.position.x,
+            pose.transform.position.y,
+            pose.transform.position.z,
+          );
+          this.reticle.object3D.visible = true;
         },
       });
 
@@ -218,7 +254,7 @@
           return;
         }
 
-        sceneEl.setAttribute("ground-reticle", "");
+        sceneEl.setAttribute("ar-hit-test", "");
 
         const updateStatus = (message) => {
           statusEl.textContent = message;

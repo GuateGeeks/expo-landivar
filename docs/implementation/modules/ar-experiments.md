@@ -5,23 +5,23 @@
 Four standalone AR demo pages that serve as base configurations for augmented reality integration:
 
 1. **AR.js Marker Tracking** — Detects a Hiro marker via the device camera and renders a rotating 3D box anchored to the marker.
-2. **AR.js Markerless Placement** — Places the Magnemite model in front of the camera with a tap (no marker, no surface hit-test).
-3. **WebXR Surface Placement** — Uses WebXR immersive AR to place the Magnemite model on a virtual ground plane with a reticle and tap-to-place control.
+2. **A-Frame Markerless Placement** — Uses the device camera as a video background and places the Magnemite model relative to the camera (no marker, no surface hit-test).
+3. **WebXR Surface Placement** — Uses WebXR immersive AR hit-test to place the Magnemite model on detected surfaces with a reticle and tap-to-place control.
 4. **MindAR Image Tracking** — Detects a natural card image via the device camera and overlays a 3D model with animation.
 
 All pages launch the device camera, run AR detection or placement logic, and render 3D content in real-time. The overlays are tuned for mobile: safe-area padding, tap-target sizing, and `viewport-fit=cover`.
 
 ## Where It Lives
 
-| File                   | Purpose                                               |
-| ---------------------- | ----------------------------------------------------- |
-| `arjs.html`            | AR.js marker-based demo (standalone HTML)             |
-| `arjs-placement.html`  | AR.js markerless placement demo (standalone HTML)     |
-| `webxr-placement.html` | WebXR placement demo (standalone HTML)                |
-| `mindar.html`          | MindAR image-tracking demo (standalone HTML)          |
-| `vite.config.ts`       | MPA build config — registers AR pages as entry points |
-| `src/App.tsx`          | Navigation hub with links to all AR pages             |
-| `src/App.css`          | Card grid layout for the navigation hub               |
+| File                    | Purpose                                               |
+| ----------------------- | ----------------------------------------------------- |
+| `arjs.html`             | AR.js marker-based demo (standalone HTML)             |
+| `aframe-placement.html` | A-Frame markerless placement demo (standalone HTML)   |
+| `webxr-placement.html`  | WebXR placement demo (standalone HTML)                |
+| `mindar.html`           | MindAR image-tracking demo (standalone HTML)          |
+| `vite.config.ts`        | MPA build config — registers AR pages as entry points |
+| `src/App.tsx`           | Navigation hub with links to all AR pages             |
+| `src/App.css`           | Card grid layout for the navigation hub               |
 
 ## Architecture Decision
 
@@ -57,7 +57,7 @@ AR pages are **standalone HTML files** (not React components) because:
 npm run dev
 # Visit http://localhost:5173/         → navigation hub
 # Visit http://localhost:5173/arjs.html             → AR.js marker demo
-# Visit http://localhost:5173/arjs-placement.html   → AR.js markerless placement
+# Visit http://localhost:5173/aframe-placement.html   → A-Frame markerless placement
 # Visit http://localhost:5173/webxr-placement.html  → WebXR placement
 # Visit http://localhost:5173/mindar.html           → MindAR demo
 ```
@@ -66,7 +66,7 @@ npm run dev
 
 ```bash
 npm run build
-# Verify output includes: dist/index.html, dist/arjs.html, dist/arjs-placement.html,
+# Verify output includes: dist/index.html, dist/arjs.html, dist/aframe-placement.html,
 # dist/webxr-placement.html, dist/mindar.html
 ```
 
@@ -76,9 +76,9 @@ npm run build
 2. Print or display the [Hiro marker](https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png) on screen
 3. Point camera at the marker → a rotating indigo box should appear
 
-### AR.js markerless placement
+### A-Frame markerless placement
 
-1. Open `/arjs-placement.html` on a device with a camera (HTTPS required)
+1. Open `/aframe-placement.html` on a device with a camera (HTTPS required)
 2. Tap **Place** → Magnemite appears in front of the camera
 3. Tap **Reset** → Magnemite hides and can be placed again
 

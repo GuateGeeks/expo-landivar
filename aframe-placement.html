@@ -6,12 +6,10 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <title>AR.js — Markerless Placement</title>
+    <title>A-Frame — Markerless Placement</title>
 
     <!-- A-Frame 1.6.0 -->
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-    <!-- AR.js 3.4.7 — marker + location build -->
-    <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.7/aframe/build/aframe-ar.js"></script>
 
     <style>
       body {
@@ -20,6 +18,30 @@
         font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
+        background: black;
+      }
+
+      #camera-feed {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        object-fit: cover;
+        z-index: 0;
+        background: black;
+      }
+
+      a-scene {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 1;
+      }
+
+      .a-canvas {
+        width: 100% !important;
+        height: 100% !important;
       }
 
       .overlay {
@@ -103,6 +125,12 @@
       .actions button:disabled {
         opacity: 0.55;
       }
+
+      .status {
+        margin: 0.25rem 0 0;
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.8);
+      }
     </style>
   </head>
 
@@ -110,26 +138,28 @@
     <!-- Navigation overlay -->
     <div class="overlay" id="overlay">
       <a href="./">← Back</a>
-      <h1>AR.js — Markerless Placement</h1>
+      <h1>A-Frame — Markerless Placement</h1>
     </div>
 
     <!-- Instructions -->
     <div class="instructions">
-      Tap Place to drop Magnemite in front of you. AR.js does not provide
-      surface hit-testing, so placement is relative to the camera. Requires
-      HTTPS or localhost.
+      Tap Place to drop Magnemite in front of you. This uses a camera video
+      background with a 3D overlay, so placement is relative to the camera.
+      Requires HTTPS or localhost.
+      <p class="status" id="status">Requesting camera access...</p>
       <div class="actions">
-        <button id="place-button" type="button">Place</button>
-        <button id="reset-button" type="button">Reset</button>
+        <button id="place-button" type="button" disabled>Place</button>
+        <button id="reset-button" type="button" disabled>Reset</button>
       </div>
     </div>
 
-    <!-- AR.js A-Frame scene: markerless camera placement -->
+    <video id="camera-feed" autoplay muted playsinline></video>
+
+    <!-- A-Frame scene: markerless camera placement -->
     <a-scene
       embedded
-      arjs="sourceType: webcam; debugUIEnabled: false;"
       vr-mode-ui="enabled: false"
-      renderer="logarithmicDepthBuffer: true; colorManagement: true;"
+      renderer="colorManagement: true; alpha: true;"
     >
       <a-assets>
         <a-asset-item
@@ -152,14 +182,61 @@
 
     <script>
       window.addEventListener("load", () => {
+        const statusEl = document.getElementById("status");
+        const videoEl = document.getElementById("camera-feed");
+        const sceneEl = document.querySelector("a-scene");
         const placeButton = document.getElementById("place-button");
         const resetButton = document.getElementById("reset-button");
         const modelEl = document.getElementById("magnemite");
         const cameraEl = document.querySelector("[camera]");
 
-        if (!placeButton || !resetButton || !modelEl || !cameraEl) {
+        if (
+          !statusEl ||
+          !videoEl ||
+          !sceneEl ||
+          !placeButton ||
+          !resetButton ||
+          !modelEl ||
+          !cameraEl
+        ) {
           return;
         }
+
+        const setControlsEnabled = (enabled) => {
+          placeButton.disabled = !enabled;
+          resetButton.disabled = !enabled;
+        };
+
+        const updateStatus = (message) => {
+          statusEl.textContent = message;
+        };
+
+        const startCamera = async () => {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+              video: { facingMode: "environment" },
+              audio: false,
+            });
+
+            videoEl.srcObject = stream;
+            await videoEl.play();
+            updateStatus("Camera ready. Tap Place.");
+            setControlsEnabled(true);
+
+            if (sceneEl.renderer) {
+              sceneEl.renderer.setClearColor(0x000000, 0);
+            } else {
+              sceneEl.addEventListener("loaded", () => {
+                if (sceneEl.renderer) {
+                  sceneEl.renderer.setClearColor(0x000000, 0);
+                }
+              });
+            }
+          } catch (error) {
+            updateStatus("Unable to access the camera.");
+            setControlsEnabled(false);
+          }
+        };
 
         const placeModel = () => {
           const cameraObject = cameraEl.object3D;
@@ -169,9 +246,9 @@
           cameraObject.getWorldDirection(direction);
           cameraObject.getWorldPosition(position);
 
-          direction.multiplyScalar(2);
+          direction.multiplyScalar(2.5);
           position.add(direction);
-          position.y -= 0.4;
+          position.y -= 0.5;
 
           modelEl.object3D.position.copy(position);
           modelEl.object3D.rotation.set(0, cameraObject.rotation.y + Math.PI, 0);
@@ -184,6 +261,9 @@
 
         placeButton.addEventListener("click", placeModel);
         resetButton.addEventListener("click", resetModel);
+
+        setControlsEnabled(false);
+        startCamera();
       });
     </script>
   </body>

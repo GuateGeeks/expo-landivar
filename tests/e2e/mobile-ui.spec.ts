@@ -86,8 +86,8 @@ test.describe("mobile UI", () => {
     expect(backLinkBox?.height ?? 0).toBeGreaterThanOrEqual(44);
   });
 
-  test("AR.js placement page is mobile-first", async ({ page }) => {
-    await page.goto("/arjs-placement.html");
+  test("A-Frame placement page is mobile-first", async ({ page }) => {
+    await page.goto("/aframe-placement.html");
 
     const viewportMeta = await page
       .locator('meta[name="viewport"]')
