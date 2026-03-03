@@ -6,7 +6,7 @@ Four standalone AR demo pages that serve as base configurations for augmented re
 
 1. **AR.js Marker Tracking** — Detects a Hiro marker via the device camera and renders a rotating 3D box anchored to the marker.
 2. **A-Frame Markerless Placement** — Uses the device camera as a video background and places the Magnemite model relative to the camera (no marker, no surface hit-test).
-3. **WebXR Surface Placement** — Uses WebXR immersive AR hit-test to place the Magnemite model on detected surfaces with a reticle and tap-to-place control.
+3. **WebXR Surface Placement** — Uses WebXR immersive AR hit-test to place the Magnemite model on detected surfaces with a reticle, tap-to-place, drag-to-move, and reset controls. AR session auto-starts on page load.
 4. **MindAR Image Tracking** — Detects a natural card image via the device camera and overlays a 3D model with animation.
 
 All pages launch the device camera, run AR detection or placement logic, and render 3D content in real-time. The overlays are tuned for mobile: safe-area padding, tap-target sizing, and `viewport-fit=cover`.
@@ -85,9 +85,12 @@ npm run build
 ### WebXR placement
 
 1. Open `/webxr-placement.html` on a WebXR-capable device (HTTPS required)
-2. Tap **Start AR** and grant camera permissions
-3. Move the device until the reticle appears
-4. Tap **Place** → Magnemite appears on the virtual ground plane
+2. AR session auto-starts (tap **Start AR** as fallback if needed)
+3. Move the device until the teal reticle appears on the floor
+4. Tap **Place** → Magnemite appears floating above the reticle (~16cm scale)
+5. Touch and drag on the screen → model follows the reticle to a new position
+6. Release → model stays at the new position
+7. Tap **Reset** → model disappears, scan and place again
 
 ### MindAR verification
 
@@ -104,4 +107,4 @@ npm run build
 
 ## Status
 
-Implemented — base configurations ready for customization.
+Implemented — base configurations ready for customization. WebXR page includes auto-start, drag-to-move, and reset controls.

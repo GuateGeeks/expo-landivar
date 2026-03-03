@@ -150,13 +150,12 @@
 
       <!-- Instructions -->
       <div class="instructions">
-        Start AR, aim at the floor, and tap Place when the reticle appears.
-        Works best on modern Android devices with WebXR support. No headset
-        required.
+        Aim at the floor and tap Place when the reticle appears. After placing, drag to move.
         <p class="status" id="status">Checking WebXR support...</p>
         <div class="actions">
           <button id="start-ar" type="button">Start AR</button>
           <button id="place-button" type="button" disabled>Place</button>
+          <button id="reset-button" type="button" disabled>Reset</button>
         </div>
       </div>
     </div>
@@ -192,7 +191,7 @@
         src="#magnemite-model"
         position="0 0 -2"
         rotation="0 0 0"
-        scale="0.05 0.05 0.05"
+        scale="0.01 0.01 0.01"
         play-gltf-animation="clip: Take 001"
         visible="false"
       ></a-gltf-model>
@@ -322,6 +321,11 @@
         const statusEl = document.getElementById("status");
         const reticle = document.getElementById("reticle");
         const modelEl = document.getElementById("magnemite");
+        const resetButton = document.getElementById("reset-button");
+
+        let isPlaced = false;
+        let isDragging = false;
+        let dragRafId = null;
 
         if (!sceneEl || !startButton || !placeButton || !statusEl) {
           return;
@@ -368,7 +372,7 @@
             startButton.disabled = true;
           });
 
-        startButton.addEventListener("click", () => {
+        const startArSession = () => {
           const enterPromise = sceneEl.enterAR
             ? sceneEl.enterAR()
             : sceneEl.enterVR(true);
@@ -380,7 +384,10 @@
           }
 
           vibrate();
-        });
+        };
+
+        startButton.addEventListener("click", startArSession);
+        startArSession();
 
         sceneEl.addEventListener("enter-vr", () => {
           if (sceneEl.is("ar-mode")) {
@@ -390,6 +397,13 @@
         });
 
         sceneEl.addEventListener("exit-vr", () => {
+          isPlaced = false;
+          isDragging = false;
+          if (dragRafId) {
+            cancelAnimationFrame(dragRafId);
+            dragRafId = null;
+          }
+          if (resetButton) resetButton.disabled = true;
           updateStatus("AR session ended.");
           setPlacementEnabled(false);
           if (modelEl) {
@@ -401,20 +415,68 @@
         });
 
         placeButton.addEventListener("click", () => {
-          if (!reticle || !modelEl) {
-            return;
-          }
-
+          if (!reticle || !modelEl) return;
           if (!reticle.object3D.visible) {
             updateStatus("Reticle not found yet. Keep moving.");
             return;
           }
 
-          modelEl.object3D.position.copy(reticle.object3D.position);
+          modelEl.object3D.position.set(
+            reticle.object3D.position.x,
+            reticle.object3D.position.y + 0.15,
+            reticle.object3D.position.z
+          );
           modelEl.object3D.rotation.set(0, sceneEl.camera.rotation.y + Math.PI, 0);
           modelEl.setAttribute("visible", "true");
-          updateStatus("Placed. Tap Place again to reposition.");
+          isPlaced = true;
+          if (resetButton) resetButton.disabled = false;
+          updateStatus("Placed! Drag to move, or tap Place to reposition.");
           vibrate();
+        });
+
+        if (resetButton) {
+          resetButton.addEventListener("click", () => {
+            isPlaced = false;
+            isDragging = false;
+            if (dragRafId) {
+              cancelAnimationFrame(dragRafId);
+              dragRafId = null;
+            }
+            if (modelEl) modelEl.setAttribute("visible", "false");
+            resetButton.disabled = true;
+            updateStatus("Move your device to find the floor.");
+            vibrate();
+          });
+        }
+
+        function dragLoop() {
+          if (!isDragging || !reticle || !modelEl) return;
+          if (reticle.object3D.visible) {
+            modelEl.object3D.position.set(
+              reticle.object3D.position.x,
+              reticle.object3D.position.y + 0.15,
+              reticle.object3D.position.z
+            );
+          }
+          dragRafId = requestAnimationFrame(dragLoop);
+        }
+
+        document.addEventListener("pointerdown", (e) => {
+          if (e.target.tagName === "BUTTON" || e.target.tagName === "A") return;
+          if (!isPlaced || !modelEl || !modelEl.object3D.visible) return;
+          isDragging = true;
+          updateStatus("Dragging...");
+          dragLoop();
+        });
+
+        document.addEventListener("pointerup", () => {
+          if (!isDragging) return;
+          isDragging = false;
+          if (dragRafId) {
+            cancelAnimationFrame(dragRafId);
+            dragRafId = null;
+          }
+          updateStatus("Placed! Drag to move, or tap Place to reposition.");
         });
       });
     </script>
