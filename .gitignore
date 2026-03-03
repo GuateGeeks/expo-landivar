@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local AR.js-next clone (data files copied to public/)
+arjs-plugin-threejs/
