@@ -34,7 +34,7 @@ const mlExperiments: DemoCard[] = [
     title: "MediaPipe Vision",
     href: `${baseUrl}mediapipe.html`,
     description:
-      "8 real-time AI vision tasks: face detection, face mesh, hand tracking, gesture recognition, pose detection, object detection, image classification, and segmentation — all running in the browser via WebAssembly.",
+      "7 real-time AI vision tasks: face detection, face mesh, hand tracking, gesture recognition, pose detection, object detection, and image classification — all running in the browser via WebAssembly.",
     marker: "Live camera feed",
     tech: "MediaPipe Tasks-Vision 0.10.32 + WASM",
   },

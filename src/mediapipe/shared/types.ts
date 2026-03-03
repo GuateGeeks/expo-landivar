@@ -6,7 +6,6 @@ export const VISION_TASKS = [
   "face-landmark",
   "object-detection",
   "image-classification",
-  "image-segmentation",
 ] as const;
 
 export type VisionTaskId = (typeof VISION_TASKS)[number];
@@ -74,15 +73,6 @@ export const TASK_META: Record<VisionTaskId, VisionTaskMeta> = {
     description: "Classify the dominant object in view with confidence scores.",
     modelUrl:
       "https://storage.googleapis.com/mediapipe-models/image_classifier/efficientnet_lite0/float32/1/efficientnet_lite0.tflite",
-    supportsVideo: true,
-  },
-  "image-segmentation": {
-    id: "image-segmentation",
-    label: "Image Segmentation",
-    description:
-      "Segment the scene into semantic regions with colored overlays.",
-    modelUrl:
-      "https://storage.googleapis.com/mediapipe-models/image_segmenter/deeplab_v3/float32/1/deeplab_v3.tflite",
     supportsVideo: true,
   },
 };

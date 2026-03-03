@@ -2,7 +2,7 @@
 
 ## What It Does
 
-A single-page React application with a bottom carousel that lets users run 8 different MediaPipe vision AI tasks in real-time using their device camera. Tasks are selected by swiping the carousel until an icon snaps into the center ring; activation begins after a short delay. A flip-camera button lets mobile users switch between front and rear cameras. All inference runs client-side via WebAssembly — no server required.
+A single-page React application with a bottom carousel that lets users run 7 different MediaPipe vision AI tasks in real-time using their device camera. Tasks are selected by swiping the carousel until an icon snaps into the center ring; activation begins after a short delay. A flip-camera button lets mobile users switch between front and rear cameras. All inference runs client-side via WebAssembly — no server required.
 
 Includes an optional **broadcast mode** that streams the canvas (video + AI overlay) to the [Control Center](./control-center.md) via WebRTC.
 
@@ -17,7 +17,6 @@ Includes an optional **broadcast mode** that streams the canvas (video + AI over
 | 5   | Face Landmark        | Live camera | 478-point face mesh with tessellation, eyes, lips, eyebrows  |
 | 6   | Object Detection     | Live camera | Bounding boxes + class labels (80+ classes)                  |
 | 7   | Image Classification | Live camera | Top-5 classification labels with confidence scores           |
-| 8   | Image Segmentation   | Live camera | DeepLab v3 category mask overlay (21 Pascal VOC classes)     |
 
 ## Where It Lives
 
@@ -42,7 +41,6 @@ Includes an optional **broadcast mode** that streams the canvas (video + AI over
 | `src/mediapipe/tasks/usePoseLandmark.ts`        | Pose landmark hook                                                       |
 | `src/mediapipe/tasks/useObjectDetection.ts`     | Object detection hook                                                    |
 | `src/mediapipe/tasks/useImageClassification.ts` | Image classification hook                                                |
-| `src/mediapipe/tasks/useImageSegmentation.ts`   | Image segmentation hook                                                  |
 
 ## Architecture Decisions
 
@@ -135,7 +133,7 @@ npm run build
    - **Pose Landmark**: Body skeleton overlay
    - **Object Detection**: Colored bounding boxes with class labels
    - **Image Classification**: Top-5 labels with percentages
-   - **Image Segmentation**: Colored overlay with legend
+   - **Image Classification**: Top-5 labels with percentages
 5. Tap the flip button (🔄) to switch to the rear camera and confirm the preview is not mirrored
 
 ### Broadcast verification

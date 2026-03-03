@@ -11,7 +11,6 @@ import { useGestureRecognition } from "./tasks/useGestureRecognition.ts";
 import { usePoseLandmark } from "./tasks/usePoseLandmark.ts";
 import { useObjectDetection } from "./tasks/useObjectDetection.ts";
 import { useImageClassification } from "./tasks/useImageClassification.ts";
-import { useImageSegmentation } from "./tasks/useImageSegmentation.ts";
 import { TaskCarousel } from "./TaskCarousel.tsx";
 
 type Status = "idle" | "loading" | "running" | "error";
@@ -38,7 +37,6 @@ export function MediaPipeApp() {
   const poseLandmark = usePoseLandmark();
   const objectDetection = useObjectDetection();
   const imageClassification = useImageClassification();
-  const imageSegmentation = useImageSegmentation();
 
   const tasks = useMemo(
     () =>
@@ -50,7 +48,6 @@ export function MediaPipeApp() {
         "pose-landmark": poseLandmark,
         "object-detection": objectDetection,
         "image-classification": imageClassification,
-        "image-segmentation": imageSegmentation,
       }) as const,
     [
       faceDetection,
@@ -60,7 +57,6 @@ export function MediaPipeApp() {
       poseLandmark,
       objectDetection,
       imageClassification,
-      imageSegmentation,
     ],
   );
 
@@ -177,7 +173,6 @@ export function MediaPipeApp() {
     "pose-landmark": "🕺",
     "object-detection": "📦",
     "image-classification": "🔎",
-    "image-segmentation": "🧩",
   };
 
   return (

@@ -42,9 +42,9 @@ test.describe("mobile UI", () => {
     await expect(topBar).toBeVisible();
     await expect(topBar).toHaveCSS("position", "absolute");
 
-    // Carousel items are always visible (8 circular items)
+    // Carousel items are always visible (7 circular items)
     const carouselItems = page.locator(".carousel-item");
-    await expect(carouselItems).toHaveCount(8);
+    await expect(carouselItems).toHaveCount(7);
     await expect(carouselItems.first()).toBeVisible();
 
     // Carousel items are circular
