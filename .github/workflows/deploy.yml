@@ -34,8 +34,10 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+    env:
+      VITE_SIGNALING_URL: ${{ secrets.VITE_SIGNALING_URL }}
 
-  deploy:
+    deploy:
     needs: build
     runs-on: ubuntu-latest
     environment:
@@ -43,4 +45,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+      uses: actions/deploy-pages@v4
