@@ -96,10 +96,25 @@
         font-size: 0.9rem;
         font-weight: 600;
         letter-spacing: 0.01em;
+        transition:
+          transform 0.08s ease,
+          filter 0.08s ease,
+          box-shadow 0.08s ease;
       }
 
       .actions button:disabled {
         opacity: 0.55;
+      }
+
+      .actions button:active:not(:disabled) {
+        transform: translateY(1px) scale(0.98);
+        filter: brightness(1.1);
+        box-shadow: 0 0 0 2px rgba(0, 212, 200, 0.3);
+      }
+
+      .actions button:focus-visible {
+        outline: 2px solid #00d4c8;
+        outline-offset: 2px;
       }
 
       .status {
@@ -107,25 +122,42 @@
         font-size: 0.75rem;
         color: rgba(255, 255, 255, 0.8);
       }
+
+      .status.bump {
+        animation: status-bump 0.25s ease;
+      }
+
+      @keyframes status-bump {
+        0% {
+          transform: translateY(0);
+          opacity: 0.7;
+        }
+        100% {
+          transform: translateY(-2px);
+          opacity: 1;
+        }
+      }
     </style>
   </head>
 
   <body>
     <!-- Navigation overlay -->
-    <div class="overlay" id="overlay">
-      <a href="./">← Back</a>
-      <h1>WebXR — Surface Placement</h1>
-    </div>
+    <div id="ar-overlay">
+      <div class="overlay" id="overlay">
+        <a href="./">← Back</a>
+        <h1>WebXR — Surface Placement</h1>
+      </div>
 
-    <!-- Instructions -->
-    <div class="instructions">
-      Start AR, aim at the floor, and tap Place when the reticle appears.
-      Works best on modern Android devices with WebXR support. No headset
-      required.
-      <p class="status" id="status">Checking WebXR support...</p>
-      <div class="actions">
-        <button id="start-ar" type="button">Start AR</button>
-        <button id="place-button" type="button" disabled>Place</button>
+      <!-- Instructions -->
+      <div class="instructions">
+        Start AR, aim at the floor, and tap Place when the reticle appears.
+        Works best on modern Android devices with WebXR support. No headset
+        required.
+        <p class="status" id="status">Checking WebXR support...</p>
+        <div class="actions">
+          <button id="start-ar" type="button">Start AR</button>
+          <button id="place-button" type="button" disabled>Place</button>
+        </div>
       </div>
     </div>
 
@@ -134,7 +166,7 @@
       embedded
       renderer="colorManagement: true; physicallyCorrectLights: true; alpha: true"
       vr-mode-ui="enabled: false"
-      webxr="requiredFeatures: hit-test; optionalFeatures: dom-overlay, local-floor; overlayElement: #overlay;"
+      webxr="requiredFeatures: hit-test; optionalFeatures: dom-overlay, local-floor; overlayElement: #ar-overlay;"
     >
       <a-assets>
         <a-asset-item
@@ -168,8 +200,8 @@
     </a-scene>
 
     <script>
-      if (!AFRAME.components["ar-hit-test"]) {
-        AFRAME.registerComponent("ar-hit-test", {
+      if (!AFRAME.components["custom-hit-test"]) {
+        AFRAME.registerComponent("custom-hit-test", {
         init() {
           this.reticle = document.getElementById("reticle");
           this.hitTestSource = null;
@@ -256,10 +288,19 @@
           return;
         }
 
-        sceneEl.setAttribute("ar-hit-test", "");
+        sceneEl.setAttribute("custom-hit-test", "");
 
         const updateStatus = (message) => {
           statusEl.textContent = message;
+          statusEl.classList.remove("bump");
+          void statusEl.offsetWidth;
+          statusEl.classList.add("bump");
+        };
+
+        const vibrate = () => {
+          if (navigator.vibrate) {
+            navigator.vibrate(10);
+          }
         };
 
         const setPlacementEnabled = (enabled) => {
@@ -289,7 +330,17 @@
           });
 
         startButton.addEventListener("click", () => {
-          sceneEl.enterVR();
+          const enterPromise = sceneEl.enterAR
+            ? sceneEl.enterAR()
+            : sceneEl.enterVR(true);
+
+          if (enterPromise && typeof enterPromise.catch === "function") {
+            enterPromise.catch(() => {
+              updateStatus("Unable to start AR session.");
+            });
+          }
+
+          vibrate();
         });
 
         sceneEl.addEventListener("enter-vr", () => {
@@ -324,6 +375,7 @@
           modelEl.object3D.rotation.set(0, sceneEl.camera.rotation.y + Math.PI, 0);
           modelEl.setAttribute("visible", "true");
           updateStatus("Placed. Tap Place again to reposition.");
+          vibrate();
         });
       });
     </script>
