@@ -372,7 +372,7 @@
             startButton.disabled = true;
           });
 
-        const startArSession = () => {
+        startButton.addEventListener("click", () => {
           const enterPromise = sceneEl.enterAR
             ? sceneEl.enterAR()
             : sceneEl.enterVR(true);
@@ -384,9 +384,7 @@
           }
 
           vibrate();
-        };
-
-        startButton.addEventListener("click", startArSession);
+        });
 
         sceneEl.addEventListener("enter-vr", () => {
           if (sceneEl.is("ar-mode")) {
