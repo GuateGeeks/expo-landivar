@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>AR.js — Markerless Placement</title>
+
+    <!-- A-Frame 1.6.0 -->
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <!-- AR.js 3.4.7 — marker + location build -->
+    <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.7/aframe/build/aframe-ar.js"></script>
+
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 10;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: calc(0.75rem + env(safe-area-inset-top))
+          calc(1rem + env(safe-area-inset-right)) 0.75rem
+          calc(1rem + env(safe-area-inset-left));
+        background: rgba(0, 0, 0, 0.6);
+        color: white;
+      }
+
+      .overlay a {
+        color: white;
+        text-decoration: none;
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 0.375rem;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+      }
+
+      .overlay a:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .overlay h1 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0;
+        max-width: 60vw;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .instructions {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 10;
+        padding: 1rem calc(1rem + env(safe-area-inset-right))
+          calc(1rem + env(safe-area-inset-bottom))
+          calc(1rem + env(safe-area-inset-left));
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        text-align: center;
+        font-size: 0.875rem;
+        line-height: 1.5;
+      }
+
+      .actions {
+        display: flex;
+        justify-content: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-top: 0.75rem;
+      }
+
+      .actions button {
+        background: #111;
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 0.5rem;
+        min-height: 44px;
+        padding: 0.55rem 1.25rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+      }
+
+      .actions button:disabled {
+        opacity: 0.55;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Navigation overlay -->
+    <div class="overlay" id="overlay">
+      <a href="./">← Back</a>
+      <h1>AR.js — Markerless Placement</h1>
+    </div>
+
+    <!-- Instructions -->
+    <div class="instructions">
+      Tap Place to drop Magnemite in front of you. AR.js does not provide
+      surface hit-testing, so placement is relative to the camera. Requires
+      HTTPS or localhost.
+      <div class="actions">
+        <button id="place-button" type="button">Place</button>
+        <button id="reset-button" type="button">Reset</button>
+      </div>
+    </div>
+
+    <!-- AR.js A-Frame scene: markerless camera placement -->
+    <a-scene
+      embedded
+      arjs="sourceType: webcam; debugUIEnabled: false;"
+      vr-mode-ui="enabled: false"
+      renderer="logarithmicDepthBuffer: true; colorManagement: true;"
+    >
+      <a-assets>
+        <a-asset-item
+          id="magnemite-model"
+          src="./models/pokemon_magnemite/scene.gltf"
+        ></a-asset-item>
+      </a-assets>
+
+      <a-gltf-model
+        id="magnemite"
+        src="#magnemite-model"
+        position="0 -0.5 -2"
+        rotation="0 180 0"
+        scale="0.5 0.5 0.5"
+        visible="false"
+      ></a-gltf-model>
+
+      <a-entity camera></a-entity>
+    </a-scene>
+
+    <script>
+      window.addEventListener("load", () => {
+        const placeButton = document.getElementById("place-button");
+        const resetButton = document.getElementById("reset-button");
+        const modelEl = document.getElementById("magnemite");
+        const cameraEl = document.querySelector("[camera]");
+
+        if (!placeButton || !resetButton || !modelEl || !cameraEl) {
+          return;
+        }
+
+        const placeModel = () => {
+          const cameraObject = cameraEl.object3D;
+          const direction = new AFRAME.THREE.Vector3();
+          const position = new AFRAME.THREE.Vector3();
+
+          cameraObject.getWorldDirection(direction);
+          cameraObject.getWorldPosition(position);
+
+          direction.multiplyScalar(2);
+          position.add(direction);
+          position.y -= 0.4;
+
+          modelEl.object3D.position.copy(position);
+          modelEl.object3D.rotation.set(0, cameraObject.rotation.y + Math.PI, 0);
+          modelEl.setAttribute("visible", "true");
+        };
+
+        const resetModel = () => {
+          modelEl.setAttribute("visible", "false");
+        };
+
+        placeButton.addEventListener("click", placeModel);
+        resetButton.addEventListener("click", resetModel);
+      });
+    </script>
+  </body>
+</html>

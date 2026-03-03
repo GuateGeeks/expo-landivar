@@ -86,6 +86,26 @@ test.describe("mobile UI", () => {
     expect(backLinkBox?.height ?? 0).toBeGreaterThanOrEqual(44);
   });
 
+  test("AR.js placement page is mobile-first", async ({ page }) => {
+    await page.goto("/arjs-placement.html");
+
+    const viewportMeta = await page
+      .locator('meta[name="viewport"]')
+      .getAttribute("content");
+    expect(viewportMeta ?? "").toContain("viewport-fit=cover");
+
+    const bodyTouch = await page
+      .locator("body")
+      .evaluate((el) => getComputedStyle(el).touchAction);
+    expect(bodyTouch).toBe("manipulation");
+
+    const backLinkBox = await page.locator(".overlay a").boundingBox();
+    expect(backLinkBox?.height ?? 0).toBeGreaterThanOrEqual(44);
+
+    const placeButtonBox = await page.locator("#place-button").boundingBox();
+    expect(placeButtonBox?.height ?? 0).toBeGreaterThanOrEqual(44);
+  });
+
   test("MindAR page is mobile-first", async ({ page }) => {
     await page.goto("/mindar.html");
 
@@ -101,6 +121,26 @@ test.describe("mobile UI", () => {
 
     const backLinkBox = await page.locator(".overlay a").boundingBox();
     expect(backLinkBox?.height ?? 0).toBeGreaterThanOrEqual(44);
+  });
+
+  test("WebXR placement page is mobile-first", async ({ page }) => {
+    await page.goto("/webxr-placement.html");
+
+    const viewportMeta = await page
+      .locator('meta[name="viewport"]')
+      .getAttribute("content");
+    expect(viewportMeta ?? "").toContain("viewport-fit=cover");
+
+    const bodyTouch = await page
+      .locator("body")
+      .evaluate((el) => getComputedStyle(el).touchAction);
+    expect(bodyTouch).toBe("manipulation");
+
+    const backLinkBox = await page.locator(".overlay a").boundingBox();
+    expect(backLinkBox?.height ?? 0).toBeGreaterThanOrEqual(44);
+
+    const startButtonBox = await page.locator("#start-ar").boundingBox();
+    expect(startButtonBox?.height ?? 0).toBeGreaterThanOrEqual(44);
   });
 
   test("Control Center shows dark empty state", async ({ page }) => {

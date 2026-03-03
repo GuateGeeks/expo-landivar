@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>WebXR — Surface Placement</title>
+
+    <!-- A-Frame 1.6.0 (WebXR) -->
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 10;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: calc(0.75rem + env(safe-area-inset-top))
+          calc(1rem + env(safe-area-inset-right)) 0.75rem
+          calc(1rem + env(safe-area-inset-left));
+        background: rgba(0, 0, 0, 0.6);
+        color: white;
+      }
+
+      .overlay a {
+        color: white;
+        text-decoration: none;
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 0.375rem;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+      }
+
+      .overlay a:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .overlay h1 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0;
+        max-width: 60vw;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .instructions {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 10;
+        padding: 1rem calc(1rem + env(safe-area-inset-right))
+          calc(1rem + env(safe-area-inset-bottom))
+          calc(1rem + env(safe-area-inset-left));
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        text-align: center;
+        font-size: 0.875rem;
+        line-height: 1.5;
+      }
+
+      .actions {
+        display: flex;
+        justify-content: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-top: 0.75rem;
+      }
+
+      .actions button {
+        background: #111;
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 0.5rem;
+        min-height: 44px;
+        padding: 0.55rem 1.25rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+      }
+
+      .actions button:disabled {
+        opacity: 0.55;
+      }
+
+      .status {
+        margin: 0.25rem 0 0;
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.8);
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Navigation overlay -->
+    <div class="overlay" id="overlay">
+      <a href="./">← Back</a>
+      <h1>WebXR — Surface Placement</h1>
+    </div>
+
+    <!-- Instructions -->
+    <div class="instructions">
+      Start AR, aim at the floor, and tap Place when the reticle appears.
+      Works best on modern Android devices with WebXR support.
+      <p class="status" id="status">Checking WebXR support...</p>
+      <div class="actions">
+        <button id="start-ar" type="button">Start AR</button>
+        <button id="place-button" type="button" disabled>Place</button>
+      </div>
+    </div>
+
+    <!-- WebXR A-Frame scene: surface placement using a virtual ground plane -->
+    <a-scene
+      embedded
+      renderer="colorManagement: true; physicallyCorrectLights: true; alpha: true"
+      vr-mode-ui="enabled: false"
+      webxr="optionalFeatures: dom-overlay; overlayElement: #overlay;"
+    >
+      <a-assets>
+        <a-asset-item
+          id="magnemite-model"
+          src="./models/pokemon_magnemite/scene.gltf"
+        ></a-asset-item>
+      </a-assets>
+
+      <a-entity light="type: ambient; intensity: 0.7"></a-entity>
+      <a-entity light="type: directional; intensity: 0.8" position="1 2 1">
+      </a-entity>
+
+      <a-entity
+        id="reticle"
+        geometry="primitive: ring; radiusInner: 0.08; radiusOuter: 0.12"
+        material="color: #00d4c8; shader: flat; opacity: 0.9"
+        rotation="-90 0 0"
+        visible="false"
+      ></a-entity>
+
+      <a-gltf-model
+        id="magnemite"
+        src="#magnemite-model"
+        position="0 0 -2"
+        rotation="0 180 0"
+        scale="0.5 0.5 0.5"
+        visible="false"
+      ></a-gltf-model>
+
+      <a-entity camera position="0 1.6 0"></a-entity>
+    </a-scene>
+
+    <script>
+      AFRAME.registerComponent("ground-reticle", {
+        init() {
+          this.reticle = document.getElementById("reticle");
+          this.raycaster = new AFRAME.THREE.Raycaster();
+          this.center = new AFRAME.THREE.Vector2(0, 0);
+          this.plane = new AFRAME.THREE.Plane(
+            new AFRAME.THREE.Vector3(0, 1, 0),
+            0,
+          );
+          this.intersection = new AFRAME.THREE.Vector3();
+          this.camera = this.el.sceneEl.camera;
+
+          this.el.sceneEl.addEventListener("camera-set-active", () => {
+            this.camera = this.el.sceneEl.camera;
+          });
+        },
+        tick() {
+          if (!this.reticle || !this.camera || !this.el.sceneEl.is("ar-mode")) {
+            if (this.reticle) {
+              this.reticle.object3D.visible = false;
+            }
+            return;
+          }
+
+          this.raycaster.setFromCamera(this.center, this.camera);
+          const hit = this.raycaster.ray.intersectPlane(
+            this.plane,
+            this.intersection,
+          );
+
+          if (hit) {
+            this.reticle.object3D.position.copy(this.intersection);
+            this.reticle.object3D.visible = true;
+          } else {
+            this.reticle.object3D.visible = false;
+          }
+        },
+      });
+
+      window.addEventListener("load", () => {
+        const sceneEl = document.querySelector("a-scene");
+        const startButton = document.getElementById("start-ar");
+        const placeButton = document.getElementById("place-button");
+        const statusEl = document.getElementById("status");
+        const reticle = document.getElementById("reticle");
+        const modelEl = document.getElementById("magnemite");
+
+        if (!sceneEl || !startButton || !placeButton || !statusEl) {
+          return;
+        }
+
+        sceneEl.setAttribute("ground-reticle", "");
+
+        const updateStatus = (message) => {
+          statusEl.textContent = message;
+        };
+
+        const setPlacementEnabled = (enabled) => {
+          placeButton.disabled = !enabled;
+        };
+
+        if (!navigator.xr || !navigator.xr.isSessionSupported) {
+          updateStatus("WebXR is not supported on this device.");
+          startButton.disabled = true;
+          return;
+        }
+
+        navigator.xr
+          .isSessionSupported("immersive-ar")
+          .then((supported) => {
+            if (!supported) {
+              updateStatus("WebXR immersive AR is not supported here.");
+              startButton.disabled = true;
+              return;
+            }
+
+            updateStatus("WebXR ready. Tap Start AR.");
+          })
+          .catch(() => {
+            updateStatus("Unable to check WebXR support.");
+            startButton.disabled = true;
+          });
+
+        startButton.addEventListener("click", () => {
+          sceneEl.enterVR();
+        });
+
+        sceneEl.addEventListener("enter-vr", () => {
+          if (sceneEl.is("ar-mode")) {
+            updateStatus("Move your device to find the floor.");
+            setPlacementEnabled(true);
+          }
+        });
+
+        sceneEl.addEventListener("exit-vr", () => {
+          updateStatus("AR session ended.");
+          setPlacementEnabled(false);
+          if (modelEl) {
+            modelEl.setAttribute("visible", "false");
+          }
+          if (reticle) {
+            reticle.setAttribute("visible", "false");
+          }
+        });
+
+        placeButton.addEventListener("click", () => {
+          if (!reticle || !modelEl) {
+            return;
+          }
+
+          if (!reticle.object3D.visible) {
+            updateStatus("Reticle not found yet. Keep moving.");
+            return;
+          }
+
+          modelEl.object3D.position.copy(reticle.object3D.position);
+          modelEl.object3D.rotation.set(0, sceneEl.camera.rotation.y + Math.PI, 0);
+          modelEl.setAttribute("visible", "true");
+          updateStatus("Placed. Tap Place again to reposition.");
+        });
+      });
+    </script>
+  </body>
+</html>

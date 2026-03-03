@@ -20,6 +20,22 @@ const arExperiments: DemoCard[] = [
     tech: "A-Frame 1.6.0 + AR.js 3.4.7",
   },
   {
+    title: "AR.js — Markerless Placement",
+    href: `${baseUrl}arjs-placement.html`,
+    description:
+      "Places the Magnemite model in front of the camera with a tap. This option does not use surface hit-testing, but works on devices without WebXR support.",
+    marker: "None (camera-only)",
+    tech: "A-Frame 1.6.0 + AR.js 3.4.7",
+  },
+  {
+    title: "WebXR — Surface Placement",
+    href: `${baseUrl}webxr-placement.html`,
+    description:
+      "Uses WebXR immersive AR to place the Magnemite model on a virtual ground plane with a reticle and tap-to-place control.",
+    marker: "None (WebXR surface hint)",
+    tech: "A-Frame 1.6.0 + WebXR",
+  },
+  {
     title: "MindAR — Image Tracking",
     href: `${baseUrl}mindar.html`,
     description:
