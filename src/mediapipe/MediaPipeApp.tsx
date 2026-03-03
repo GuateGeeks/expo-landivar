@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import "./MediaPipeApp.css";
 import { VISION_TASKS, TASK_META } from "./shared/types.ts";
 import type { VisionTaskId } from "./shared/types.ts";
@@ -12,12 +12,12 @@ import { usePoseLandmark } from "./tasks/usePoseLandmark.ts";
 import { useObjectDetection } from "./tasks/useObjectDetection.ts";
 import { useImageClassification } from "./tasks/useImageClassification.ts";
 import { useImageSegmentation } from "./tasks/useImageSegmentation.ts";
-import { useInteractiveSegmentation } from "./tasks/useInteractiveSegmentation.ts";
+import { TaskCarousel } from "./TaskCarousel.tsx";
 
-type Status = "idle" | "loading" | "running" | "error" | "captured";
+type Status = "idle" | "loading" | "running" | "error";
 
 export function MediaPipeApp() {
-  const [activeTask, setActiveTask] = useState<VisionTaskId>("face-detection");
+  const [activeTask, setActiveTask] = useState<VisionTaskId>("face-landmark");
   const [status, setStatus] = useState<Status>("idle");
   const [statusMessage, setStatusMessage] = useState("");
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -33,113 +33,92 @@ export function MediaPipeApp() {
   const objectDetection = useObjectDetection();
   const imageClassification = useImageClassification();
   const imageSegmentation = useImageSegmentation();
-  const interactiveSegmentation = useInteractiveSegmentation();
 
-  const tasks = {
-    "face-detection": faceDetection,
-    "face-landmark": faceLandmark,
-    "hand-landmark": handLandmark,
-    "gesture-recognition": gestureRecognition,
-    "pose-landmark": poseLandmark,
-    "object-detection": objectDetection,
-    "image-classification": imageClassification,
-    "image-segmentation": imageSegmentation,
-    "interactive-segmentation": interactiveSegmentation,
-  } as const;
+  const tasks = useMemo(
+    () =>
+      ({
+        "face-detection": faceDetection,
+        "face-landmark": faceLandmark,
+        "hand-landmark": handLandmark,
+        "gesture-recognition": gestureRecognition,
+        "pose-landmark": poseLandmark,
+        "object-detection": objectDetection,
+        "image-classification": imageClassification,
+        "image-segmentation": imageSegmentation,
+      }) as const,
+    [
+      faceDetection,
+      faceLandmark,
+      handLandmark,
+      gestureRecognition,
+      poseLandmark,
+      objectDetection,
+      imageClassification,
+      imageSegmentation,
+    ],
+  );
 
-  const activeTaskHook = tasks[activeTask];
-  const taskMeta = TASK_META[activeTask];
-
-  const stopAll = useCallback(() => {
+  const stopTasks = useCallback(() => {
     for (const task of Object.values(tasks)) {
       task.cleanup();
     }
-    camera.stop();
-    broadcast.stopBroadcast();
     setStatus("idle");
     setStatusMessage("");
-    // Clear canvas
     if (canvasRef.current) {
       const ctx = canvasRef.current.getContext("2d");
       if (ctx)
         ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [camera, broadcast]);
+  }, [tasks]);
 
-  const handleStart = useCallback(async () => {
-    stopAll();
-    setStatus("loading");
-    setStatusMessage(`Loading ${taskMeta.label} model...`);
+  const stopAll = useCallback(() => {
+    stopTasks();
+    camera.stop();
+    broadcast.stopBroadcast();
+  }, [broadcast, camera, stopTasks]);
 
-    try {
-      await activeTaskHook.init();
-      setStatusMessage("Starting camera...");
-      await camera.start();
+  const startTask = useCallback(
+    async (taskId: VisionTaskId) => {
+      stopTasks();
+      setActiveTask(taskId);
+      setStatus("loading");
+      setStatusMessage(`Loading ${TASK_META[taskId].label} model...`);
+      const taskHook = tasks[taskId];
 
-      // Wait for video to be ready
-      const video = camera.videoRef.current;
-      if (!video || !canvasRef.current) {
-        throw new Error("Video or canvas not available");
-      }
-
-      await new Promise<void>((resolve) => {
-        if (video.readyState >= 2) {
-          resolve();
-        } else {
-          video.addEventListener("loadeddata", () => resolve(), { once: true });
+      try {
+        await taskHook.init();
+        if (!camera.isStreaming) {
+          setStatusMessage("Starting camera...");
+          await camera.start();
         }
-      });
 
-      if (activeTask === "interactive-segmentation") {
-        // Capture a frame and wait for clicks
-        activeTaskHook.detect(video, canvasRef.current);
-        setStatus("captured");
-        setStatusMessage("Click on the image to segment a region.");
-      } else {
-        activeTaskHook.detect(video, canvasRef.current);
+        // Wait for video to be ready
+        const video = camera.videoRef.current;
+        if (!video || !canvasRef.current) {
+          throw new Error("Video or canvas not available");
+        }
+
+        await new Promise<void>((resolve) => {
+          if (video.readyState >= 2) {
+            resolve();
+          } else {
+            video.addEventListener("loadeddata", () => resolve(), {
+              once: true,
+            });
+          }
+        });
+
+        taskHook.detect(video, canvasRef.current);
         setStatus("running");
-        setStatusMessage(`${taskMeta.label} running`);
+        setStatusMessage(`${TASK_META[taskId].label} running`);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Unknown error";
+        setStatus("error");
+        setStatusMessage(`Error: ${message}`);
       }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Unknown error";
-      setStatus("error");
-      setStatusMessage(`Error: ${message}`);
-    }
-  }, [activeTask, activeTaskHook, camera, stopAll, taskMeta.label]);
-
-  const handleTaskChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      stopAll();
-      setActiveTask(e.target.value as VisionTaskId);
     },
-    [stopAll],
+    [camera, stopTasks, tasks],
   );
-
-  const handleCanvasClick = useCallback(
-    (e: React.MouseEvent<HTMLCanvasElement>) => {
-      if (activeTask !== "interactive-segmentation" || status !== "captured")
-        return;
-
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-
-      const rect = canvas.getBoundingClientRect();
-      const normalizedX = (e.clientX - rect.left) / rect.width;
-      const normalizedY = (e.clientY - rect.top) / rect.height;
-
-      interactiveSegmentation.segmentAtPoint(canvas, normalizedX, normalizedY);
-      setStatusMessage("Segmented! Click another point or recapture.");
-    },
-    [activeTask, status, interactiveSegmentation],
-  );
-
-  const handleRecapture = useCallback(() => {
-    const video = camera.videoRef.current;
-    if (!video || !canvasRef.current) return;
-    interactiveSegmentation.captureFrame(video, canvasRef.current);
-    setStatusMessage("New frame captured. Click to segment.");
-  }, [camera.videoRef, interactiveSegmentation]);
 
   const handleToggleBroadcast = useCallback(() => {
     if (broadcast.isBroadcasting) {
@@ -151,6 +130,10 @@ export function MediaPipeApp() {
     }
   }, [broadcast]);
 
+  const handleStop = useCallback(() => {
+    stopAll();
+  }, [stopAll]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -161,37 +144,34 @@ export function MediaPipeApp() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const isInteractive = activeTask === "interactive-segmentation";
-  const isRunning = status === "running" || status === "captured";
+  const isRunning = status === "running";
 
   const statusPillClass = [
     "status-pill",
     status === "error" ? "error" : "",
     status === "loading" ? "loading" : "",
-    status === "running" || status === "captured" ? "ready" : "",
+    status === "running" ? "ready" : "",
   ]
     .filter(Boolean)
     .join(" ");
+
+  const taskIcons: Record<VisionTaskId, string> = {
+    "face-detection": "🙂",
+    "face-landmark": "🧠",
+    "hand-landmark": "✋",
+    "gesture-recognition": "👆",
+    "pose-landmark": "🕺",
+    "object-detection": "📦",
+    "image-classification": "🔎",
+    "image-segmentation": "🧩",
+  };
 
   return (
     <div className="mediapipe-app">
       {/* Fullscreen viewport — video + canvas fill the screen */}
       <div className="viewport">
-        <video
-          ref={camera.videoRef}
-          playsInline
-          muted
-          style={{
-            display: isInteractive && status === "captured" ? "none" : "block",
-          }}
-        />
-        <canvas
-          ref={canvasRef}
-          className={
-            isInteractive && status === "captured" ? "interactive" : ""
-          }
-          onClick={handleCanvasClick}
-        />
+        <video ref={camera.videoRef} playsInline muted />
+        <canvas ref={canvasRef} />
       </div>
 
       {/* Top bar overlay — back link (left) + task name + status pill (right) */}
@@ -200,92 +180,61 @@ export function MediaPipeApp() {
           ← Back
         </a>
         <div className="top-bar-right">
-          <span className="top-bar-task-name">{taskMeta.label}</span>
+          <span className="top-bar-task-name">
+            {TASK_META[activeTask].label}
+          </span>
           {statusMessage ? (
             <span className={statusPillClass}>{statusMessage}</span>
           ) : null}
         </div>
       </div>
 
-      {/* Interactive hint — floats above the bottom sheet */}
-      {isInteractive && status === "captured" && (
-        <p className="interactive-hint">
-          👆 Click anywhere on the image to segment that region
-        </p>
+      {/* Live badge — floating top-center, only when broadcasting */}
+      {broadcast.isBroadcasting && (
+        <div className="live-badge-container">
+          <span className="live-badge">EN VIVO · {broadcast.viewerCount}</span>
+        </div>
       )}
 
-      {/* Bottom sheet overlay — task select + buttons + broadcast panel */}
-      <div className="bottom-sheet">
-        <div className="controls">
-          <select
-            value={activeTask}
-            onChange={handleTaskChange}
-            disabled={isRunning}
-            aria-label="Select vision task"
+      {/* Floating action buttons — above record ring, only when running */}
+      {isRunning && (
+        <div className="action-float" role="group" aria-label="Task actions">
+          <button
+            type="button"
+            className="action-float-btn action-float-stop"
+            onClick={handleStop}
+            aria-label="Stop task"
           >
-            {VISION_TASKS.map((taskId) => (
-              <option key={taskId} value={taskId}>
-                {TASK_META[taskId].label}
-              </option>
-            ))}
-          </select>
-
-          {!isRunning ? (
-            <button onClick={handleStart} disabled={status === "loading"}>
-              {status === "loading" ? "Loading…" : "Start"}
-            </button>
-          ) : (
-            <>
-              <button className="stop" onClick={stopAll}>
-                Stop
-              </button>
-              {isInteractive && status === "captured" && (
-                <button className="capture" onClick={handleRecapture}>
-                  Recapture
-                </button>
-              )}
-            </>
-          )}
+            ⏹
+          </button>
         </div>
+      )}
 
-        {/* Broadcast controls — only visible when a task is running */}
-        {isRunning && (
-          <div className="broadcast-controls">
-            <div className="broadcast-row">
-              <label className="broadcast-name-label">
-                Name:
-                <input
-                  type="text"
-                  value={broadcast.displayName}
-                  onChange={(e) => broadcast.setDisplayName(e.target.value)}
-                  disabled={broadcast.isBroadcasting}
-                  className="broadcast-name-input"
-                  aria-label="Display name for broadcast"
-                />
-              </label>
-              <button
-                className={
-                  broadcast.isBroadcasting
-                    ? "broadcast-btn active"
-                    : "broadcast-btn"
-                }
-                onClick={handleToggleBroadcast}
-              >
-                {broadcast.isBroadcasting ? "⏹ Stop Broadcast" : "📡 Broadcast"}
-              </button>
-            </div>
-            {broadcast.isBroadcasting && (
-              <div className="broadcast-status">
-                <span className="live-badge">🔴 EN VIVO</span>
-                <span className="broadcast-info">
-                  Signal: {broadcast.signalingStatus} · Viewers:{" "}
-                  {broadcast.viewerCount}
-                </span>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      <TaskCarousel
+        tasks={VISION_TASKS}
+        taskMeta={TASK_META}
+        taskIcons={taskIcons}
+        activeTaskId={activeTask}
+        isBusy={status === "loading"}
+        onSelectTask={startTask}
+      />
+
+      {/* Record ring — broadcast toggle, sits at z-index 12 above carousel */}
+      <button
+        type="button"
+        className={
+          broadcast.isBroadcasting ? "record-btn active" : "record-btn"
+        }
+        onClick={handleToggleBroadcast}
+        aria-label={
+          broadcast.isBroadcasting ? "Stop broadcast" : "Start broadcast"
+        }
+        disabled={!isRunning}
+      >
+        <span className="record-btn-inner" aria-hidden="true">
+          {broadcast.isBroadcasting ? "🔴" : ""}
+        </span>
+      </button>
     </div>
   );
 }

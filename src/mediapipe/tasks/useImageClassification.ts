@@ -1,72 +1,65 @@
-import { useRef, useCallback } from 'react'
-import { ImageClassifier, FilesetResolver } from '@mediapipe/tasks-vision'
-import {
-  clearCanvas,
-  syncCanvasSize,
-  drawVideoFrame,
-  drawTextOverlay,
-} from '../shared/drawingUtils.ts'
-import { TASK_META } from '../shared/types.ts'
+import { useRef, useCallback } from "react";
+import { ImageClassifier } from "@mediapipe/tasks-vision";
+import { drawVideoFrame, drawTextOverlay } from "../shared/drawingUtils.ts";
+import { TASK_META } from "../shared/types.ts";
+import { getVisionFileset } from "../shared/visionWasm.ts";
+import { startVisionLoop } from "../shared/visionLoop.ts";
 
 export function useImageClassification() {
-  const classifierRef = useRef<ImageClassifier | null>(null)
-  const rafRef = useRef<number>(0)
+  const classifierRef = useRef<ImageClassifier | null>(null);
+  const rafRef = useRef<number>(0);
 
   const init = useCallback(async () => {
-    const vision = await FilesetResolver.forVisionTasks(
-      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm',
-    )
+    const vision = await getVisionFileset();
     classifierRef.current = await ImageClassifier.createFromOptions(vision, {
       baseOptions: {
-        modelAssetPath: TASK_META['image-classification'].modelUrl,
-        delegate: 'GPU',
+        modelAssetPath: TASK_META["image-classification"].modelUrl,
+        delegate: "GPU",
       },
-      runningMode: 'VIDEO',
+      runningMode: "VIDEO",
       maxResults: 5,
-    })
-  }, [])
+    });
+  }, []);
 
   const detect = useCallback(
     (video: HTMLVideoElement, canvas: HTMLCanvasElement) => {
-      const ctx = canvas.getContext('2d')
-      if (!ctx || !classifierRef.current) return
+      startVisionLoop({
+        video,
+        canvas,
+        rafRef,
+        shouldRun: () => Boolean(classifierRef.current),
+        beforeFrame: ({ ctx: frameCtx, video: frameVideo }) => {
+          drawVideoFrame(frameCtx, frameVideo);
+        },
+        onFrame: ({ video: frameVideo, ctx: frameCtx, now }) => {
+          const classifier = classifierRef.current;
+          if (!classifier) return;
 
-      const loop = () => {
-        if (!classifierRef.current || video.paused || video.ended) return
-        syncCanvasSize(canvas, video)
-        clearCanvas(ctx)
-        drawVideoFrame(ctx, video)
+          const result = classifier.classifyForVideo(frameVideo, now);
 
-        const result = classifierRef.current.classifyForVideo(
-          video,
-          performance.now(),
-        )
-
-        const lines: string[] = []
-        if (result.classifications.length > 0) {
-          const categories = result.classifications[0].categories
-          for (const cat of categories) {
-            lines.push(
-              `${cat.categoryName}: ${Math.round(cat.score * 100)}%`,
-            )
+          const lines: string[] = [];
+          if (result.classifications.length > 0) {
+            const categories = result.classifications[0].categories;
+            for (const cat of categories) {
+              lines.push(
+                `${cat.categoryName}: ${Math.round(cat.score * 100)}%`,
+              );
+            }
           }
-        }
-        if (lines.length > 0) {
-          drawTextOverlay(ctx, lines)
-        }
-
-        rafRef.current = requestAnimationFrame(loop)
-      }
-      loop()
+          if (lines.length > 0) {
+            drawTextOverlay(frameCtx, lines);
+          }
+        },
+      });
     },
     [],
-  )
+  );
 
   const cleanup = useCallback(() => {
-    cancelAnimationFrame(rafRef.current)
-    classifierRef.current?.close()
-    classifierRef.current = null
-  }, [])
+    cancelAnimationFrame(rafRef.current);
+    classifierRef.current?.close();
+    classifierRef.current = null;
+  }, []);
 
-  return { init, detect, cleanup }
+  return { init, detect, cleanup };
 }

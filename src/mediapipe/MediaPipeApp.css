@@ -36,11 +36,6 @@
   pointer-events: none;
 }
 
-.viewport canvas.interactive {
-  pointer-events: auto;
-  cursor: crosshair;
-}
-
 /* ── Top bar overlay ───────────────────────────────────────── */
 .top-bar {
   position: absolute;
@@ -124,175 +119,28 @@
   color: #fff;
 }
 
-/* ── Bottom sheet overlay ──────────────────────────────────── */
-.bottom-sheet {
+/* ── Live badge — floating top-center ─────────────────────── */
+.live-badge-container {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
-  padding: 1rem 1.25rem 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.65) 0%, transparent 100%);
-}
-
-/* ── Controls row (select + buttons) ─────────────────────── */
-.controls {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  align-items: stretch;
-}
-
-.controls select {
-  padding: 0.7rem 1rem;
-  min-height: 44px;
-  border-radius: 999px;
-  border: 1px solid var(--color-border-strong);
-  background: rgba(0, 0, 0, 0.6);
-  color: #fff;
-  font-size: 0.95rem;
-  cursor: pointer;
-  width: 100%;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}
-
-.controls select option {
-  background: #1a1a1a;
-  color: #fff;
-}
-
-.controls select:disabled {
-  opacity: 0.6;
-}
-
-.controls button {
-  width: 100%;
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  color: #fff;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}
-
-.controls button:hover {
-  background: rgba(255, 255, 255, 0.25);
-  box-shadow: none;
-}
-
-.controls button.stop {
-  background: rgba(239, 107, 91, 0.6);
-  border-color: rgba(239, 107, 91, 0.8);
-}
-
-.controls button.stop:hover {
-  background: rgba(210, 85, 72, 0.75);
-}
-
-.controls button.capture {
-  background: rgba(242, 162, 74, 0.6);
-  border-color: rgba(242, 162, 74, 0.8);
-}
-
-.controls button.capture:hover {
-  background: rgba(221, 140, 51, 0.75);
-}
-
-/* ── Broadcast controls ───────────────────────────────────── */
-.broadcast-controls {
-  padding: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
-  background: rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.broadcast-row {
-  display: flex;
-  gap: 0.75rem;
-  flex-direction: column;
-  align-items: stretch;
-}
-
-.broadcast-name-label {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.8);
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.broadcast-name-input {
-  padding: 0.6rem 0.9rem;
-  min-height: 44px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  background: rgba(0, 0, 0, 0.4);
-  color: #fff;
-  font-size: 0.95rem;
-  width: 100%;
-}
-
-.broadcast-name-input::placeholder {
-  color: rgba(255, 255, 255, 0.45);
-}
-
-.broadcast-name-input:disabled {
-  opacity: 0.6;
-}
-
-.broadcast-btn {
-  padding: 0.7rem 1rem;
-  min-height: 44px;
-  border-radius: 999px;
-  border: 1px solid rgba(0, 212, 200, 0.7);
-  background: rgba(0, 212, 200, 0.15);
-  color: var(--color-teal);
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  width: 100%;
-}
-
-.broadcast-btn:hover {
-  background: rgba(0, 212, 200, 0.28);
-}
-
-.broadcast-btn.active {
-  border-color: rgba(239, 107, 91, 0.7);
-  background: rgba(239, 107, 91, 0.25);
-  color: #ffb3ab;
-}
-
-.broadcast-btn.active:hover {
-  background: rgba(239, 107, 91, 0.4);
-}
-
-.broadcast-status {
-  display: flex;
-  gap: 0.5rem;
-  flex-direction: column;
-  align-items: flex-start;
-  font-size: 0.85rem;
+  top: 4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  pointer-events: none;
 }
 
 .live-badge {
+  display: inline-flex;
+  align-items: center;
   background: #ff4d3d;
   color: #fff;
-  padding: 0.2rem 0.6rem;
+  padding: 0.25rem 0.75rem;
   border-radius: 6px;
   font-weight: 700;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   letter-spacing: 0.05em;
   animation: live-pulse 2s ease-in-out infinite;
+  box-shadow: 0 2px 8px rgba(255, 77, 61, 0.4);
 }
 
 @keyframes live-pulse {
@@ -305,59 +153,118 @@
   }
 }
 
-.broadcast-info {
-  color: rgba(255, 255, 255, 0.75);
+/* ── Record button (broadcast toggle) ────────────────────── */
+.record-btn {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 12;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: border-color 0.2s ease;
 }
 
-/* ── Interactive hint ─────────────────────────────────────── */
-.interactive-hint {
+.record-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.record-btn.active {
+  border-color: #ff4d3d;
+  animation: record-pulse 2s ease-in-out infinite;
+}
+
+.record-btn:focus-visible {
+  outline: 2px solid rgba(0, 212, 200, 0.7);
+  outline-offset: 3px;
+}
+
+.record-btn-inner {
+  font-size: 1.1rem;
+  line-height: 1;
+  opacity: 0;
+  transform: scale(0.6);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.record-btn.active .record-btn-inner {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@keyframes record-pulse {
+  0%,
+  100% {
+    border-color: #ff4d3d;
+  }
+  50% {
+    border-color: rgba(255, 77, 61, 0.5);
+  }
+}
+
+/* ── Floating action buttons ─────────────────────────────── */
+.action-float {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 11;
-  text-align: center;
-  font-size: 0.9rem;
-  font-weight: 600;
+  bottom: 5.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.action-float-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.5);
   color: #fff;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
-  padding-bottom: calc(2rem + 6rem); /* above the bottom-sheet controls */
-  pointer-events: none;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.action-float-btn:hover {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.action-float-btn:focus-visible {
+  outline: 2px solid rgba(0, 212, 200, 0.7);
+  outline-offset: 2px;
+}
+
+.action-float-stop {
+  border-color: rgba(255, 77, 61, 0.5);
 }
 
 /* ── Tablet / Desktop tweaks ──────────────────────────────── */
 @media (min-width: 720px) {
-  .controls {
-    flex-direction: row;
-    align-items: center;
+  .record-btn {
+    width: 72px;
+    height: 72px;
   }
 
-  .controls select {
-    min-width: 240px;
-    width: auto;
-    flex: 1;
-  }
-
-  .controls button {
-    width: auto;
-  }
-
-  .broadcast-row {
-    flex-direction: row;
-    align-items: center;
-  }
-
-  .broadcast-name-label {
-    min-width: 220px;
-    flex: 1;
-  }
-
-  .broadcast-btn {
-    width: auto;
-  }
-
-  .broadcast-status {
-    flex-direction: row;
-    align-items: center;
+  .record-btn-inner {
+    font-size: 1.3rem;
   }
 }

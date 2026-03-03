@@ -1,21 +1,38 @@
-import { useRef, useCallback } from 'react'
-import { ImageSegmenter, FilesetResolver } from '@mediapipe/tasks-vision'
+import { useRef, useCallback } from "react";
+import { ImageSegmenter } from "@mediapipe/tasks-vision";
 import {
-  clearCanvas,
-  syncCanvasSize,
   drawVideoFrame,
   drawLegendText,
   drawLegendRect,
-} from '../shared/drawingUtils.ts'
-import { TASK_META } from '../shared/types.ts'
+} from "../shared/drawingUtils.ts";
+import { TASK_META } from "../shared/types.ts";
+import { getVisionFileset } from "../shared/visionWasm.ts";
+import { startVisionLoop } from "../shared/visionLoop.ts";
 
 /** DeepLab v3 category labels (21 Pascal VOC classes). */
 const CATEGORY_LABELS = [
-  'background', 'aeroplane', 'bicycle', 'bird', 'boat', 'bottle',
-  'bus', 'car', 'cat', 'chair', 'cow', 'dining table', 'dog',
-  'horse', 'motorbike', 'person', 'potted plant', 'sheep', 'sofa',
-  'train', 'tv/monitor',
-]
+  "background",
+  "aeroplane",
+  "bicycle",
+  "bird",
+  "boat",
+  "bottle",
+  "bus",
+  "car",
+  "cat",
+  "chair",
+  "cow",
+  "dining table",
+  "dog",
+  "horse",
+  "motorbike",
+  "person",
+  "potted plant",
+  "sheep",
+  "sofa",
+  "train",
+  "tv/monitor",
+];
 
 /** Per-category RGBA colors for the segmentation overlay. */
 const CATEGORY_COLORS: [number, number, number, number][] = [
@@ -40,105 +57,123 @@ const CATEGORY_COLORS: [number, number, number, number][] = [
   [0, 192, 0, 160],
   [128, 192, 0, 160],
   [0, 64, 128, 160],
-]
+];
 
 export function useImageSegmentation() {
-  const segmenterRef = useRef<ImageSegmenter | null>(null)
-  const rafRef = useRef<number>(0)
+  const segmenterRef = useRef<ImageSegmenter | null>(null);
+  const rafRef = useRef<number>(0);
+  const isProcessingRef = useRef(false);
 
   const init = useCallback(async () => {
-    const vision = await FilesetResolver.forVisionTasks(
-      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm',
-    )
+    const vision = await getVisionFileset();
     segmenterRef.current = await ImageSegmenter.createFromOptions(vision, {
       baseOptions: {
-        modelAssetPath: TASK_META['image-segmentation'].modelUrl,
-        delegate: 'GPU',
+        modelAssetPath: TASK_META["image-segmentation"].modelUrl,
+        delegate: "GPU",
       },
-      runningMode: 'VIDEO',
+      runningMode: "VIDEO",
       outputCategoryMask: true,
       outputConfidenceMasks: false,
-    })
-  }, [])
+    });
+  }, []);
 
   const detect = useCallback(
     (video: HTMLVideoElement, canvas: HTMLCanvasElement) => {
-      const ctx = canvas.getContext('2d')
-      if (!ctx || !segmenterRef.current) return
+      startVisionLoop({
+        video,
+        canvas,
+        rafRef,
+        shouldRun: () => Boolean(segmenterRef.current),
+        onFrame: ({
+          video: frameVideo,
+          canvas: frameCanvas,
+          ctx: frameCtx,
+          now,
+        }) => {
+          const segmenter = segmenterRef.current;
+          if (!segmenter || isProcessingRef.current) return;
 
-      const loop = () => {
-        if (!segmenterRef.current || video.paused || video.ended) return
-        syncCanvasSize(canvas, video)
-        clearCanvas(ctx)
+          isProcessingRef.current = true;
 
-        segmenterRef.current.segmentForVideo(
-          video,
-          performance.now(),
-          (result) => {
-            if (!result.categoryMask) return
-
-            const mask = result.categoryMask.getAsUint8Array()
-            const width = result.categoryMask.width
-            const height = result.categoryMask.height
-            // Draw video frame first so captureStream gets video + overlay
-            drawVideoFrame(ctx, video)
-
-            // Build mask overlay on a temp canvas so putImageData doesn't
-            // overwrite the video frame (putImageData ignores compositing)
-            const overlayCanvas = document.createElement('canvas')
-            overlayCanvas.width = width
-            overlayCanvas.height = height
-            const overlayCtx = overlayCanvas.getContext('2d')
-            if (!overlayCtx) return
-
-            const imageData = overlayCtx.createImageData(width, height)
-            const detectedCategories = new Set<number>()
-
-            for (let i = 0; i < mask.length; i++) {
-              const category = mask[i]
-              if (category > 0) detectedCategories.add(category)
-              const color = CATEGORY_COLORS[category % CATEGORY_COLORS.length]
-              imageData.data[i * 4] = color[0]
-              imageData.data[i * 4 + 1] = color[1]
-              imageData.data[i * 4 + 2] = color[2]
-              imageData.data[i * 4 + 3] = color[3]
-            }
-
-            overlayCtx.putImageData(imageData, 0, 0)
-            ctx.drawImage(overlayCanvas, 0, 0, canvas.width, canvas.height)
-
-            // Show legend for detected categories (un-mirrored text)
-            if (detectedCategories.size > 0) {
-              const legendY = canvas.height - 30 * detectedCategories.size - 10
-              let i = 0
-              for (const cat of detectedCategories) {
-                const color = CATEGORY_COLORS[cat % CATEGORY_COLORS.length]
-                const label = CATEGORY_LABELS[cat] ?? `class ${cat}`
-                ctx.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.9)`
-                drawLegendRect(ctx, 10, legendY + i * 30, 20, 20)
-                ctx.fillStyle = '#FFFFFF'
-                ctx.font = 'bold 14px system-ui, sans-serif'
-                drawLegendText(ctx, label, 36, legendY + i * 30 + 15)
-                i++
+          return new Promise<void>((resolve) => {
+            segmenter.segmentForVideo(frameVideo, now, (result) => {
+              if (!result.categoryMask) {
+                isProcessingRef.current = false;
+                resolve();
+                return;
               }
-            }
 
-            result.categoryMask.close()
-          },
-        )
+              const mask = result.categoryMask.getAsUint8Array();
+              const width = result.categoryMask.width;
+              const height = result.categoryMask.height;
+              drawVideoFrame(frameCtx, frameVideo);
 
-        rafRef.current = requestAnimationFrame(loop)
-      }
-      loop()
+              const overlayCanvas = document.createElement("canvas");
+              overlayCanvas.width = width;
+              overlayCanvas.height = height;
+              const overlayCtx = overlayCanvas.getContext("2d");
+              if (!overlayCtx) {
+                isProcessingRef.current = false;
+                resolve();
+                return;
+              }
+
+              const imageData = overlayCtx.createImageData(width, height);
+              const detectedCategories = new Set<number>();
+
+              for (let i = 0; i < mask.length; i++) {
+                const category = mask[i];
+                if (category > 0) detectedCategories.add(category);
+                const color =
+                  CATEGORY_COLORS[category % CATEGORY_COLORS.length];
+                imageData.data[i * 4] = color[0];
+                imageData.data[i * 4 + 1] = color[1];
+                imageData.data[i * 4 + 2] = color[2];
+                imageData.data[i * 4 + 3] = color[3];
+              }
+
+              overlayCtx.putImageData(imageData, 0, 0);
+              frameCtx.drawImage(
+                overlayCanvas,
+                0,
+                0,
+                frameCanvas.width,
+                frameCanvas.height,
+              );
+
+              if (detectedCategories.size > 0) {
+                const legendY =
+                  frameCanvas.height - 30 * detectedCategories.size - 10;
+                let i = 0;
+                for (const cat of detectedCategories) {
+                  const color = CATEGORY_COLORS[cat % CATEGORY_COLORS.length];
+                  const label = CATEGORY_LABELS[cat] ?? `class ${cat}`;
+                  frameCtx.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.9)`;
+                  drawLegendRect(frameCtx, 10, legendY + i * 30, 20, 20);
+                  frameCtx.fillStyle = "#FFFFFF";
+                  frameCtx.font = "bold 14px system-ui, sans-serif";
+                  drawLegendText(frameCtx, label, 36, legendY + i * 30 + 15);
+                  i++;
+                }
+              }
+
+              result.categoryMask.close();
+              isProcessingRef.current = false;
+              resolve();
+            });
+          });
+        },
+      });
     },
     [],
-  )
+  );
 
   const cleanup = useCallback(() => {
-    cancelAnimationFrame(rafRef.current)
-    segmenterRef.current?.close()
-    segmenterRef.current = null
-  }, [])
+    cancelAnimationFrame(rafRef.current);
+    isProcessingRef.current = false;
+    segmenterRef.current?.close();
+    segmenterRef.current = null;
+  }, []);
 
-  return { init, detect, cleanup }
+  return { init, detect, cleanup };
 }

@@ -37,21 +37,31 @@ test.describe("mobile UI", () => {
   test("MediaPipe page has fullscreen overlay layout", async ({ page }) => {
     await page.goto("/mediapipe.html");
 
-    // Bottom-sheet overlay is present
-    const bottomSheet = page.locator(".bottom-sheet");
-    await expect(bottomSheet).toBeVisible();
-
-    // Bottom-sheet is absolutely positioned (overlay, not sticky)
-    await expect(bottomSheet).toHaveCSS("position", "absolute");
-
     // Top-bar overlay is present
     const topBar = page.locator(".top-bar");
     await expect(topBar).toBeVisible();
     await expect(topBar).toHaveCSS("position", "absolute");
 
-    // Select element meets tap-target height
-    const selectBox = await page.locator(".task-select").boundingBox();
-    expect(selectBox?.height ?? 0).toBeGreaterThanOrEqual(44);
+    // Carousel items are always visible (8 circular items)
+    const carouselItems = page.locator(".carousel-item");
+    await expect(carouselItems).toHaveCount(8);
+    await expect(carouselItems.first()).toBeVisible();
+
+    // Carousel items are circular
+    await expect(carouselItems.first()).toHaveCSS("border-radius", "50%");
+
+    // Carousel items meet tap-target size (≥44px)
+    const itemBox = await carouselItems.first().boundingBox();
+    expect(itemBox?.height ?? 0).toBeGreaterThanOrEqual(44);
+    expect(itemBox?.width ?? 0).toBeGreaterThanOrEqual(44);
+
+    // No task rail exists (removed)
+    await expect(page.locator(".task-rail")).toHaveCount(0);
+
+    // Record button is visible but disabled before running
+    const recordButton = page.locator(".record-btn");
+    await expect(recordButton).toBeVisible();
+    await expect(recordButton).toBeDisabled();
   });
 
   test("Control Center shows dark empty state", async ({ page }) => {
