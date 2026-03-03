@@ -21,7 +21,11 @@ export function usePoseLandmark() {
   }, []);
 
   const detect = useCallback(
-    (video: HTMLVideoElement, canvas: HTMLCanvasElement) => {
+    (
+      video: HTMLVideoElement,
+      canvas: HTMLCanvasElement,
+      shouldMirror: () => boolean,
+    ) => {
       let drawingUtils: DrawingUtils | null = null;
       startVisionLoop({
         video,
@@ -29,7 +33,7 @@ export function usePoseLandmark() {
         rafRef,
         shouldRun: () => Boolean(landmarkerRef.current),
         beforeFrame: ({ ctx: frameCtx, video: frameVideo }) => {
-          drawVideoFrame(frameCtx, frameVideo);
+          drawVideoFrame(frameCtx, frameVideo, shouldMirror());
         },
         onFrame: ({ video: frameVideo, ctx: frameCtx, now }) => {
           const landmarker = landmarkerRef.current;

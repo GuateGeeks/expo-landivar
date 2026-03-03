@@ -25,7 +25,11 @@ export function useObjectDetection() {
   }, []);
 
   const detect = useCallback(
-    (video: HTMLVideoElement, canvas: HTMLCanvasElement) => {
+    (
+      video: HTMLVideoElement,
+      canvas: HTMLCanvasElement,
+      shouldMirror: () => boolean,
+    ) => {
       const COLORS = ["#FF6633", "#33FF66", "#3366FF", "#FF33FF", "#FFFF33"];
       startVisionLoop({
         video,
@@ -33,7 +37,7 @@ export function useObjectDetection() {
         rafRef,
         shouldRun: () => Boolean(detectorRef.current),
         beforeFrame: ({ ctx: frameCtx, video: frameVideo }) => {
-          drawVideoFrame(frameCtx, frameVideo);
+          drawVideoFrame(frameCtx, frameVideo, shouldMirror());
         },
         onFrame: async ({
           video: frameVideo,

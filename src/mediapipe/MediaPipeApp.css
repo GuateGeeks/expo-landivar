@@ -25,6 +25,9 @@
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.viewport video.mirror {
   transform: scaleX(-1);
 }
 
@@ -255,6 +258,10 @@
 
 .action-float-stop {
   border-color: rgba(255, 77, 61, 0.5);
+}
+
+.action-float-flip {
+  border-color: rgba(0, 212, 200, 0.45);
 }
 
 /* ── Tablet / Desktop tweaks ──────────────────────────────── */

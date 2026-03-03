@@ -78,7 +78,11 @@ export function useImageSegmentation() {
   }, []);
 
   const detect = useCallback(
-    (video: HTMLVideoElement, canvas: HTMLCanvasElement) => {
+    (
+      video: HTMLVideoElement,
+      canvas: HTMLCanvasElement,
+      shouldMirror: () => boolean,
+    ) => {
       startVisionLoop({
         video,
         canvas,
@@ -106,7 +110,7 @@ export function useImageSegmentation() {
               const mask = result.categoryMask.getAsUint8Array();
               const width = result.categoryMask.width;
               const height = result.categoryMask.height;
-              drawVideoFrame(frameCtx, frameVideo);
+              drawVideoFrame(frameCtx, frameVideo, shouldMirror());
 
               const overlayCanvas = document.createElement("canvas");
               overlayCanvas.width = width;

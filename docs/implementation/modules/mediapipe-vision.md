@@ -2,7 +2,7 @@
 
 ## What It Does
 
-A single-page React application with a bottom carousel that lets users run 8 different MediaPipe vision AI tasks in real-time using their device camera. Tasks are selected by swiping the carousel until an icon snaps into the center ring; activation begins after a short delay. All inference runs client-side via WebAssembly — no server required.
+A single-page React application with a bottom carousel that lets users run 8 different MediaPipe vision AI tasks in real-time using their device camera. Tasks are selected by swiping the carousel until an icon snaps into the center ring; activation begins after a short delay. A flip-camera button lets mobile users switch between front and rear cameras. All inference runs client-side via WebAssembly — no server required.
 
 Includes an optional **broadcast mode** that streams the canvas (video + AI overlay) to the [Control Center](./control-center.md) via WebRTC.
 
@@ -30,7 +30,7 @@ Includes an optional **broadcast mode** that streams the canvas (video + AI over
 | `src/mediapipe/TaskCarousel.tsx`                | Horizontal carousel with snap + delayed activation                       |
 | `src/mediapipe/TaskCarousel.css`                | Carousel layout, circular items, snap styles                             |
 | `src/mediapipe/shared/types.ts`                 | Task IDs, metadata, model URLs                                           |
-| `src/mediapipe/shared/useCamera.ts`             | Shared camera stream hook (`getUserMedia`)                               |
+| `src/mediapipe/shared/useCamera.ts`             | Shared camera stream hook (`getUserMedia`, flip, facingMode)             |
 | `src/mediapipe/shared/useBroadcast.ts`          | WebRTC broadcast hook (signaling + peer management)                      |
 | `src/mediapipe/shared/drawingUtils.ts`          | Canvas drawing helpers (boxes, landmarks, connectors, masks, text)       |
 | `src/mediapipe/shared/visionWasm.ts`            | Cached MediaPipe WASM fileset loader                                     |
@@ -59,11 +59,15 @@ Unlike the AR demos (which use standalone HTML due to A-Frame DOM conflicts), Me
 Each vision task is encapsulated in a custom hook with a uniform interface:
 
 ```typescript
-{ init: () => Promise<void>, detect: (video, canvas) => void, cleanup: () => void }
+{
+  init: () => Promise<void>
+  detect: (video, canvas, shouldMirror) => void
+  cleanup: () => void
+}
 ```
 
 - `init()` — Downloads the model and creates the MediaPipe task instance
-- `detect()` — Starts the `requestAnimationFrame` detection loop
+- `detect()` — Starts the `requestAnimationFrame` detection loop (uses `shouldMirror()` per frame)
 - `cleanup()` — Cancels the loop and releases the task
 
 ### Lazy model loading
@@ -75,6 +79,10 @@ The MediaPipe WASM fileset is cached after first use and reused across tasks to 
 ### Camera reuse on task switch
 
 Switching between tasks keeps the camera stream alive. Only the task loop and model instance are restarted, which avoids the visible camera reload flicker.
+
+### Camera flip on mobile
+
+The action bar includes a flip-camera button when multiple cameras are detected. Flipping stops the current stream and reopens the camera with the opposite `facingMode`. The canvas mirror is enabled only for the front-facing camera so rear-camera output stays unmirrored.
 
 ### Broadcast mode (integrated publisher)
 
@@ -128,6 +136,7 @@ npm run build
    - **Object Detection**: Colored bounding boxes with class labels
    - **Image Classification**: Top-5 labels with percentages
    - **Image Segmentation**: Colored overlay with legend
+5. Tap the flip button (🔄) to switch to the rear camera and confirm the preview is not mirrored
 
 ### Broadcast verification
 

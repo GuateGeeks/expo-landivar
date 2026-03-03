@@ -32,7 +32,16 @@ export const startVisionLoop = ({
   if (!ctx) return;
 
   const loop = () => {
-    if (!shouldRun() || video.paused || video.ended) return;
+    if (!shouldRun()) return;
+    if (
+      video.paused ||
+      video.ended ||
+      video.videoWidth === 0 ||
+      video.videoHeight === 0
+    ) {
+      rafRef.current = requestAnimationFrame(loop);
+      return;
+    }
 
     syncCanvasSize(canvas, video);
     clearCanvas(ctx);

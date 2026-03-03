@@ -22,14 +22,18 @@ export function useImageClassification() {
   }, []);
 
   const detect = useCallback(
-    (video: HTMLVideoElement, canvas: HTMLCanvasElement) => {
+    (
+      video: HTMLVideoElement,
+      canvas: HTMLCanvasElement,
+      shouldMirror: () => boolean,
+    ) => {
       startVisionLoop({
         video,
         canvas,
         rafRef,
         shouldRun: () => Boolean(classifierRef.current),
         beforeFrame: ({ ctx: frameCtx, video: frameVideo }) => {
-          drawVideoFrame(frameCtx, frameVideo);
+          drawVideoFrame(frameCtx, frameVideo, shouldMirror());
         },
         onFrame: ({ video: frameVideo, ctx: frameCtx, now }) => {
           const classifier = classifierRef.current;

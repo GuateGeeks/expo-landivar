@@ -25,14 +25,18 @@ export function useFaceDetection() {
   }, []);
 
   const detect = useCallback(
-    (video: HTMLVideoElement, canvas: HTMLCanvasElement) => {
+    (
+      video: HTMLVideoElement,
+      canvas: HTMLCanvasElement,
+      shouldMirror: () => boolean,
+    ) => {
       startVisionLoop({
         video,
         canvas,
         rafRef,
         shouldRun: () => Boolean(detectorRef.current),
         beforeFrame: ({ ctx: frameCtx, video: frameVideo }) => {
-          drawVideoFrame(frameCtx, frameVideo);
+          drawVideoFrame(frameCtx, frameVideo, shouldMirror());
         },
         onFrame: ({ video: frameVideo, ctx: frameCtx, now }) => {
           const detector = detectorRef.current;

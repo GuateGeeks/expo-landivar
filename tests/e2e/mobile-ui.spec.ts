@@ -62,6 +62,45 @@ test.describe("mobile UI", () => {
     const recordButton = page.locator(".record-btn");
     await expect(recordButton).toBeVisible();
     await expect(recordButton).toBeDisabled();
+
+    // Flip button is hidden until a task is running and cameras are detected
+    await expect(page.locator('button[aria-label="Flip camera"]')).toHaveCount(
+      0,
+    );
+  });
+
+  test("AR.js page is mobile-first", async ({ page }) => {
+    await page.goto("/arjs.html");
+
+    const viewportMeta = await page
+      .locator('meta[name="viewport"]')
+      .getAttribute("content");
+    expect(viewportMeta ?? "").toContain("viewport-fit=cover");
+
+    const bodyTouch = await page
+      .locator("body")
+      .evaluate((el) => getComputedStyle(el).touchAction);
+    expect(bodyTouch).toBe("manipulation");
+
+    const backLinkBox = await page.locator(".overlay a").boundingBox();
+    expect(backLinkBox?.height ?? 0).toBeGreaterThanOrEqual(44);
+  });
+
+  test("MindAR page is mobile-first", async ({ page }) => {
+    await page.goto("/mindar.html");
+
+    const viewportMeta = await page
+      .locator('meta[name="viewport"]')
+      .getAttribute("content");
+    expect(viewportMeta ?? "").toContain("viewport-fit=cover");
+
+    const bodyTouch = await page
+      .locator("body")
+      .evaluate((el) => getComputedStyle(el).touchAction);
+    expect(bodyTouch).toBe("manipulation");
+
+    const backLinkBox = await page.locator(".overlay a").boundingBox();
+    expect(backLinkBox?.height ?? 0).toBeGreaterThanOrEqual(44);
   });
 
   test("Control Center shows dark empty state", async ({ page }) => {

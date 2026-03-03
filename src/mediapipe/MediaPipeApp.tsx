@@ -22,8 +22,13 @@ export function MediaPipeApp() {
   const [status, setStatus] = useState<Status>("idle");
   const [statusMessage, setStatusMessage] = useState("");
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const mirrorRef = useRef(true);
   const camera = useCamera();
   const broadcast = useBroadcast();
+
+  useEffect(() => {
+    mirrorRef.current = camera.facingMode === "user";
+  }, [camera.facingMode]);
 
   // All task hooks
   const faceDetection = useFaceDetection();
@@ -78,6 +83,8 @@ export function MediaPipeApp() {
     broadcast.stopBroadcast();
   }, [broadcast, camera, stopTasks]);
 
+  const getShouldMirror = useCallback(() => mirrorRef.current, []);
+
   const startTask = useCallback(
     async (taskId: VisionTaskId) => {
       stopTasks();
@@ -109,7 +116,7 @@ export function MediaPipeApp() {
           }
         });
 
-        taskHook.detect(video, canvasRef.current);
+        taskHook.detect(video, canvasRef.current, getShouldMirror);
         setStatus("running");
         setStatusMessage(`${TASK_META[taskId].label} running`);
       } catch (err) {
@@ -118,7 +125,7 @@ export function MediaPipeApp() {
         setStatusMessage(`Error: ${message}`);
       }
     },
-    [camera, stopTasks, tasks],
+    [camera, getShouldMirror, stopTasks, tasks],
   );
 
   const handleToggleBroadcast = useCallback(() => {
@@ -135,6 +142,11 @@ export function MediaPipeApp() {
     stopAll();
   }, [stopAll]);
 
+  const handleFlipCamera = useCallback(async () => {
+    if (!camera.hasMultipleCameras) return;
+    await camera.flip();
+  }, [camera]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -146,6 +158,7 @@ export function MediaPipeApp() {
   }, []);
 
   const isRunning = status === "running";
+  const isMirror = camera.facingMode === "user";
 
   const statusPillClass = [
     "status-pill",
@@ -171,7 +184,12 @@ export function MediaPipeApp() {
     <div className="mediapipe-app">
       {/* Fullscreen viewport — video + canvas fill the screen */}
       <div className="viewport">
-        <video ref={camera.videoRef} playsInline muted />
+        <video
+          ref={camera.videoRef}
+          className={isMirror ? "mirror" : undefined}
+          playsInline
+          muted
+        />
         <canvas ref={canvasRef} />
       </div>
 
@@ -200,6 +218,16 @@ export function MediaPipeApp() {
       {/* Floating action buttons — above record ring, only when running */}
       {isRunning && (
         <div className="action-float" role="group" aria-label="Task actions">
+          {camera.hasMultipleCameras && (
+            <button
+              type="button"
+              className="action-float-btn action-float-flip"
+              onClick={handleFlipCamera}
+              aria-label="Flip camera"
+            >
+              🔄
+            </button>
+          )}
           <button
             type="button"
             className="action-float-btn action-float-stop"

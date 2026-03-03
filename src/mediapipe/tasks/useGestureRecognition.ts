@@ -22,7 +22,11 @@ export function useGestureRecognition() {
   }, []);
 
   const detect = useCallback(
-    (video: HTMLVideoElement, canvas: HTMLCanvasElement) => {
+    (
+      video: HTMLVideoElement,
+      canvas: HTMLCanvasElement,
+      shouldMirror: () => boolean,
+    ) => {
       let drawingUtils: DrawingUtils | null = null;
       startVisionLoop({
         video,
@@ -30,7 +34,7 @@ export function useGestureRecognition() {
         rafRef,
         shouldRun: () => Boolean(recognizerRef.current),
         beforeFrame: ({ ctx: frameCtx, video: frameVideo }) => {
-          drawVideoFrame(frameCtx, frameVideo);
+          drawVideoFrame(frameCtx, frameVideo, shouldMirror());
         },
         onFrame: ({ video: frameVideo, ctx: frameCtx, now }) => {
           const recognizer = recognizerRef.current;
