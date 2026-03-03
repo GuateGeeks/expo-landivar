@@ -168,7 +168,8 @@
     </a-scene>
 
     <script>
-      AFRAME.registerComponent("ar-hit-test", {
+      if (!AFRAME.components["ar-hit-test"]) {
+        AFRAME.registerComponent("ar-hit-test", {
         init() {
           this.reticle = document.getElementById("reticle");
           this.hitTestSource = null;
@@ -240,7 +241,8 @@
           );
           this.reticle.object3D.visible = true;
         },
-      });
+        });
+      }
 
       window.addEventListener("load", () => {
         const sceneEl = document.querySelector("a-scene");
