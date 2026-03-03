@@ -186,6 +186,38 @@
       to see a 3D box. Requires HTTPS or localhost.
     </div>
 
+
+    <!--
+      Cross-origin Worker shim: browsers block new Worker() with CDN URLs.
+      This patches the Worker constructor to wrap cross-origin module workers
+      in a same-origin blob that imports the real script, preserving relative
+      imports inside the worker.
+    -->
+    <script>
+      (function () {
+        const NativeWorker = window.Worker;
+        window.Worker = function (url, options) {
+          const urlStr = url instanceof URL ? url.href : String(url);
+          const isCrossOrigin =
+            urlStr.startsWith("http") &&
+            !urlStr.startsWith(location.origin);
+          const isModule = options && options.type === "module";
+
+          if (isCrossOrigin && isModule) {
+            const blob = new Blob(
+              ['import "' + urlStr + '";'],
+              { type: "text/javascript" }
+            );
+            const blobUrl = URL.createObjectURL(blob);
+            return new NativeWorker(blobUrl, options);
+          }
+
+          return new NativeWorker(url, options);
+        };
+        window.Worker.prototype = NativeWorker.prototype;
+      })();
+    </script>
+
     <script type="module">
       // --- CDN Imports ---
       import {
