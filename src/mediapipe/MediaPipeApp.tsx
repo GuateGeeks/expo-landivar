@@ -17,6 +17,7 @@ import { TaskCarousel } from "./TaskCarousel.tsx";
 type Status = "idle" | "loading" | "running" | "error";
 
 export function MediaPipeApp() {
+  const baseUrl = import.meta.env.BASE_URL;
   const [activeTask, setActiveTask] = useState<VisionTaskId>("face-landmark");
   const [status, setStatus] = useState<Status>("idle");
   const [statusMessage, setStatusMessage] = useState("");
@@ -176,7 +177,7 @@ export function MediaPipeApp() {
 
       {/* Top bar overlay — back link (left) + task name + status pill (right) */}
       <div className="top-bar">
-        <a href="/" className="back-link">
+        <a href={baseUrl} className="back-link">
           ← Back
         </a>
         <div className="top-bar-right">

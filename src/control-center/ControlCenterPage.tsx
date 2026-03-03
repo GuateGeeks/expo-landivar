@@ -15,6 +15,7 @@ import "./ControlCenterPage.css";
 const SIGNALING_URL =
   (import.meta.env.VITE_SIGNALING_URL as string) || "ws://localhost:8080/ws";
 const ROOM_ID = (import.meta.env.VITE_ROOM_ID as string) || "default";
+const baseUrl = import.meta.env.BASE_URL;
 
 interface Tile {
   clientId: string;
@@ -196,7 +197,7 @@ export function ControlCenterPage() {
 
   return (
     <div className="control-center">
-      <a href="/" className="back-link">
+      <a href={baseUrl} className="back-link">
         ← Back to demos
       </a>
       <h1>Control Center</h1>
@@ -219,8 +220,8 @@ export function ControlCenterPage() {
         <div className="empty-state">
           <p>No publishers connected yet.</p>
           <p className="hint">
-            Open <a href="/mediapipe.html">/mediapipe.html</a> on another
-            device, start a task, and enable broadcasting.
+            Open <a href={`${baseUrl}mediapipe.html`}>mediapipe.html</a> on
+            another device, start a task, and enable broadcasting.
           </p>
         </div>
       ) : (

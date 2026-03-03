@@ -1,5 +1,7 @@
 import "./App.css";
 
+const baseUrl = import.meta.env.BASE_URL;
+
 interface DemoCard {
   title: string;
   href: string;
@@ -11,7 +13,7 @@ interface DemoCard {
 const arExperiments: DemoCard[] = [
   {
     title: "AR.js — Marker Tracking",
-    href: "/arjs.html",
+    href: `${baseUrl}arjs.html`,
     description:
       "Uses AR.js with A-Frame to detect a Hiro marker and display a rotating 3D box. Marker-based tracking is lightweight and works well on low-end devices.",
     marker: "Hiro marker (printed or on-screen)",
@@ -19,7 +21,7 @@ const arExperiments: DemoCard[] = [
   },
   {
     title: "MindAR — Image Tracking",
-    href: "/mindar.html",
+    href: `${baseUrl}mindar.html`,
     description:
       "Uses MindAR with A-Frame to detect a card image and overlay a 3D model. Image tracking uses computer vision to recognize natural images without special markers.",
     marker: "MindAR card image",
@@ -30,9 +32,9 @@ const arExperiments: DemoCard[] = [
 const mlExperiments: DemoCard[] = [
   {
     title: "MediaPipe Vision",
-    href: "/mediapipe.html",
+    href: `${baseUrl}mediapipe.html`,
     description:
-      "9 real-time AI vision tasks: face detection, face mesh, hand tracking, gesture recognition, pose detection, object detection, image classification, and segmentation — all running in the browser via WebAssembly.",
+      "8 real-time AI vision tasks: face detection, face mesh, hand tracking, gesture recognition, pose detection, object detection, image classification, and segmentation — all running in the browser via WebAssembly.",
     marker: "Live camera feed",
     tech: "MediaPipe Tasks-Vision 0.10.32 + WASM",
   },
@@ -41,7 +43,7 @@ const mlExperiments: DemoCard[] = [
 const liveTools: DemoCard[] = [
   {
     title: "Control Center",
-    href: "/control-center.html",
+    href: `${baseUrl}control-center.html`,
     description:
       "View all connected publishers in real-time. Each publisher runs MediaPipe locally and broadcasts their canvas (video + AI overlay) via WebRTC to this centralized viewer.",
     marker: "WebRTC streams from publishers",
