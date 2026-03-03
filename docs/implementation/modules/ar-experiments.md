@@ -19,8 +19,8 @@ All pages launch the device camera, run AR detection or placement logic, and ren
 | `aframe-placement.html` | A-Frame markerless placement demo (standalone HTML) |
 | `webxr-placement.html` | WebXR placement demo (standalone HTML) |
 | `mindar.html` | MindAR image-tracking demo (standalone HTML) |
-| `public/vendor/arjs-next/data/camera_para.dat` | ARToolKit camera parameters (binary, ~176 bytes) |
-| `public/vendor/arjs-next/data/patt.hiro` | Hiro marker pattern file (~12 KB) |
+| `public/assets/vendor/arjs-next/data/camera_para.dat` | ARToolKit camera parameters (binary, ~176 bytes) |
+| `public/assets/vendor/arjs-next/data/patt.hiro` | Hiro marker pattern file (~12 KB) |
 | `vite.config.ts` | MPA build config — registers AR pages as entry points |
 | `src/App.tsx` | Navigation hub with links to all AR pages |
 | `src/App.css` | Card grid layout for the navigation hub |
@@ -43,7 +43,7 @@ The marker tracking page uses the **AR.js-next ecosystem** — a modern rewrite 
 - **Engine + plugins** — `Engine` orchestrates `CaptureSystem` (webcam), `FramePumpSystem` (frame loop), `ArtoolkitPlugin` (WASM marker detection), and `ThreeJSRendererPlugin` (Three.js rendering)
 - **Import map** — The `ThreeJSRendererPlugin` CDN bundle does `import * as t from "three"` internally. A `<script type="importmap">` resolves this bare specifier to the Three.js CDN URL at browser runtime.
 - **Auto-start** — No buttons. The page bootstraps the engine, starts the webcam, and loads the marker pattern automatically for expo UX.
-- **Data files in `public/`** — `camera_para.dat` and `patt.hiro` are binary files not available via CDN. They are copied from `arjs-plugin-threejs/examples/minimal/data/` and served from `public/vendor/arjs-next/data/`.
+- **Data files in `public/`** — `camera_para.dat` and `patt.hiro` are binary files not available via CDN. They are copied from `arjs-plugin-threejs/examples/minimal/data/` and served from `public/assets/vendor/arjs-next/data/`.
 - **Event bridge** — `ar:getMarker` events are bridged to `ar:marker` for the ThreeJSRendererPlugin's anchor system. Content (rotating cube) is added to anchors on first detection.
 
 ## External Dependencies (CDN only)
