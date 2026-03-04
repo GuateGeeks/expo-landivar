@@ -7,7 +7,7 @@ import type { SignalMessage } from '../../infrastructure/signaling/index.ts'
 import { getOrCreateClientId } from '../../shared/utils/clientId.ts'
 import { createPeerConnection } from '../../shared/webrtc/index.ts'
 
-const SIGNALING_URL = (import.meta.env.VITE_SIGNALING_URL as string) || 'ws://localhost:8080/ws'
+const SIGNALING_URL = (import.meta.env.VITE_SIGNALING_URL as string) || "ws://socket.adawolfs.com/ws";
 const ROOM_ID = (import.meta.env.VITE_ROOM_ID as string) || 'default'
 
 export interface BroadcastState {

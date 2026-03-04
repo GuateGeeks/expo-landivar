@@ -13,7 +13,7 @@ import { VideoTile } from "./VideoTile.tsx";
 import "./ControlCenterPage.css";
 
 const SIGNALING_URL =
-  (import.meta.env.VITE_SIGNALING_URL as string) || "ws://localhost:8080/ws";
+  (import.meta.env.VITE_SIGNALING_URL as string) || "ws://socket.adawolfs.com/ws";
 const ROOM_ID = (import.meta.env.VITE_ROOM_ID as string) || "default";
 const baseUrl = import.meta.env.BASE_URL;
 
