@@ -2,28 +2,34 @@
 
 ## What It Does
 
-Four standalone AR demo pages that serve as base configurations for augmented reality integration:
+Six standalone AR demo pages that serve as base configurations for augmented reality integration:
 
 1. **AR.js-next Marker Tracking** — Uses the AR.js-next ECS engine with ARToolKit WASM worker and Three.js renderer to detect a Hiro marker via the device camera and render a rotating 3D cube anchored to it. Auto-starts on page load (no buttons).
 2. **A-Frame Markerless Placement** — Uses the device camera as a video background and places the Magnemite model relative to the camera (no marker, no surface hit-test).
 3. **WebXR Surface Placement** — Uses WebXR immersive AR hit-test to place the Magnemite model on detected surfaces with a reticle, tap-to-place, drag-to-move, and reset controls. AR session auto-starts on page load.
-4. **MindAR Image Tracking** — Detects a natural card image via the device camera and overlays a 3D model with animation.
+4. **MindAR Pokemon Cards** — Multi-target image tracking for Pokemon cards with per-card 3D overlays.
+5. **MindAR Interactive Book (starter)** — Starter image-tracking scene for book-page targets.
+6. **MindAR Business Card (starter)** — Starter image-tracking scene for business-card targets.
 
 All pages launch the device camera, run AR detection or placement logic, and render 3D content in real-time. The overlays are tuned for mobile: safe-area padding, tap-target sizing, and `viewport-fit=cover`.
 
 ## Where It Lives
 
-| File | Purpose |
-| --- | --- |
-| `arjs.html` | AR.js-next marker-based demo (standalone HTML + Three.js) |
-| `aframe-placement.html` | A-Frame markerless placement demo (standalone HTML) |
-| `webxr-placement.html` | WebXR placement demo (standalone HTML) |
-| `mindar.html` | MindAR image-tracking demo (standalone HTML) |
-| `public/assets/vendor/arjs-next/data/camera_para.dat` | ARToolKit camera parameters (binary, ~176 bytes) |
-| `public/assets/vendor/arjs-next/data/patt.hiro` | Hiro marker pattern file (~12 KB) |
-| `vite.config.ts` | MPA build config — registers AR pages as entry points |
-| `src/App.tsx` | Navigation hub with links to all AR pages |
-| `src/App.css` | Card grid layout for the navigation hub |
+| File                                                  | Purpose                                                              |
+| ----------------------------------------------------- | -------------------------------------------------------------------- |
+| `arjs.html`                                           | AR.js-next marker-based demo (standalone HTML + Three.js)            |
+| `aframe-placement.html`                               | A-Frame markerless placement demo (standalone HTML)                  |
+| `webxr-placement.html`                                | WebXR placement demo (standalone HTML)                               |
+| `mindar.html`                                         | Legacy compatibility route that redirects to `ar/pokemon-cards.html` |
+| `ar/index.html`                                       | AR menu route with links to all AR experiences                       |
+| `ar/pokemon-cards.html`                               | MindAR Pokemon cards demo (standalone HTML)                          |
+| `ar/interactive-book.html`                            | MindAR interactive-book starter (standalone HTML)                    |
+| `ar/business-card.html`                               | MindAR business-card starter (standalone HTML)                       |
+| `public/assets/vendor/arjs-next/data/camera_para.dat` | ARToolKit camera parameters (binary, ~176 bytes)                     |
+| `public/assets/vendor/arjs-next/data/patt.hiro`       | Hiro marker pattern file (~12 KB)                                    |
+| `vite.config.ts`                                      | MPA build config — registers AR pages as entry points                |
+| `src/App.tsx`                                         | Navigation hub with links to all AR pages                            |
+| `src/App.css`                                         | Card grid layout for the navigation hub                              |
 
 ## Architecture Decisions
 
@@ -50,19 +56,19 @@ The marker tracking page uses the **AR.js-next ecosystem** — a modern rewrite 
 
 ### AR.js-next page (`arjs.html`)
 
-| Package | Version | CDN URL |
-| --- | --- | --- |
-| `@ar-js-org/ar.js-next` | 0.2.0 | `https://cdn.jsdelivr.net/npm/@ar-js-org/ar.js-next@0.2.0/dist/arjs-core.mjs` |
-| `@ar-js-org/arjs-plugin-artoolkit` | 0.1.3 | `https://cdn.jsdelivr.net/npm/@ar-js-org/arjs-plugin-artoolkit@0.1.3/dist/arjs-plugin-artoolkit.es.js` |
-| `@ar-js-org/arjs-plugin-threejs` | 0.1.1 | `https://cdn.jsdelivr.net/npm/@ar-js-org/arjs-plugin-threejs@0.1.1/dist/arjs-plugin-threejs.mjs` |
-| Three.js | 0.182.0 | `https://unpkg.com/three@0.182.0/build/three.module.js` |
+| Package                            | Version | CDN URL                                                                                                |
+| ---------------------------------- | ------- | ------------------------------------------------------------------------------------------------------ |
+| `@ar-js-org/ar.js-next`            | 0.2.0   | `https://cdn.jsdelivr.net/npm/@ar-js-org/ar.js-next@0.2.0/dist/arjs-core.mjs`                          |
+| `@ar-js-org/arjs-plugin-artoolkit` | 0.1.3   | `https://cdn.jsdelivr.net/npm/@ar-js-org/arjs-plugin-artoolkit@0.1.3/dist/arjs-plugin-artoolkit.es.js` |
+| `@ar-js-org/arjs-plugin-threejs`   | 0.1.1   | `https://cdn.jsdelivr.net/npm/@ar-js-org/arjs-plugin-threejs@0.1.1/dist/arjs-plugin-threejs.mjs`       |
+| Three.js                           | 0.182.0 | `https://unpkg.com/three@0.182.0/build/three.module.js`                                                |
 
 ### Other AR pages
 
-| Library | Version | CDN URL |
-| --- | --- | --- |
-| A-Frame | 1.6.0 | `https://aframe.io/releases/1.6.0/aframe.min.js` |
-| MindAR | 1.2.5 | `https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js` |
+| Library | Version | CDN URL                                                                       |
+| ------- | ------- | ----------------------------------------------------------------------------- |
+| A-Frame | 1.6.0   | `https://aframe.io/releases/1.6.0/aframe.min.js`                              |
+| MindAR  | 1.2.5   | `https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js` |
 
 **No npm packages were added.** All AR libraries are loaded from CDN at runtime. Only binary data files (`camera_para.dat`, `patt.hiro`) are committed to `public/`.
 
@@ -84,7 +90,10 @@ npm run dev
 # Visit http://localhost:5173/arjs.html             → AR.js-next marker demo
 # Visit http://localhost:5173/aframe-placement.html → A-Frame markerless placement
 # Visit http://localhost:5173/webxr-placement.html  → WebXR placement
-# Visit http://localhost:5173/mindar.html           → MindAR demo
+# Visit http://localhost:5173/ar/index.html         → AR route menu
+# Visit http://localhost:5173/ar/pokemon-cards.html   → MindAR Pokemon Cards
+# Visit http://localhost:5173/ar/interactive-book.html → MindAR Interactive Book (starter)
+# Visit http://localhost:5173/ar/business-card.html    → MindAR Business Card (starter)
 ```
 
 ### Production build
@@ -97,6 +106,10 @@ npm run build
 #   dist/aframe-placement.html
 #   dist/webxr-placement.html
 #   dist/mindar.html
+#   dist/ar/index.html
+#   dist/ar/pokemon-cards.html
+#   dist/ar/interactive-book.html
+#   dist/ar/business-card.html
 #   dist/vendor/arjs-next/data/camera_para.dat
 #   dist/vendor/arjs-next/data/patt.hiro
 ```
@@ -125,11 +138,17 @@ npm run build
 6. Release → model stays at the new position
 7. Tap **Reset** → model disappears, scan and place again
 
-### MindAR verification
+### MindAR Pokemon cards verification
 
-1. Open `/mindar.html` on a device with a camera (HTTPS required)
+1. Open `/ar/pokemon-cards.html` on a device with a camera (HTTPS required)
 2. Display the [MindAR card image](https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/card.png)
 3. Point camera at the card → a card overlay and animated 3D model should appear
+
+### MindAR starter pages verification
+
+1. Open `/ar/interactive-book.html` and `/ar/business-card.html`
+2. Confirm camera session opens and an overlay appears when a known image target is detected
+3. Replace `imageTargetSrc` and associated overlays with project-specific targets/assets
 
 ## Requirements
 
@@ -140,7 +159,7 @@ npm run build
 
 ## Status
 
-Implemented — all four AR demos functional. AR.js-next marker page uses modern ECS + WASM architecture with auto-start. WebXR page includes auto-start, drag-to-move, and reset controls.
+Implemented — AR.js, A-Frame markerless, WebXR, and MindAR Pokemon cards are functional. Interactive-book and business-card MindAR pages are starter templates for dedicated target files.
 
 ### Not Yet Implemented
 

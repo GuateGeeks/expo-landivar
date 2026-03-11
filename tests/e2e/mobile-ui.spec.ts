@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 test.describe("mobile UI", () => {
   test("home page has dark theme and stacked card grid", async ({ page }) => {
@@ -106,8 +106,30 @@ test.describe("mobile UI", () => {
     expect(placeButtonBox?.height ?? 0).toBeGreaterThanOrEqual(44);
   });
 
-  test("MindAR page is mobile-first", async ({ page }) => {
-    await page.goto("/mindar.html");
+  test("AR index menu lists all AR options", async ({ page }) => {
+    await page.goto("/ar/index.html");
+
+    const viewportMeta = await page
+      .locator('meta[name="viewport"]')
+      .getAttribute("content");
+    expect(viewportMeta ?? "").toContain("viewport-fit=cover");
+
+    await expect(page.locator('a[href="../arjs.html"]')).toBeVisible();
+    await expect(
+      page.locator('a[href="../aframe-placement.html"]'),
+    ).toBeVisible();
+    await expect(
+      page.locator('a[href="../webxr-placement.html"]'),
+    ).toBeVisible();
+    await expect(page.locator('a[href="./pokemon-cards.html"]')).toBeVisible();
+    await expect(
+      page.locator('a[href="./interactive-book.html"]'),
+    ).toBeVisible();
+    await expect(page.locator('a[href="./business-card.html"]')).toBeVisible();
+  });
+
+  async function expectMobileArBaseline(path: string, page: Page) {
+    await page.goto(path);
 
     const viewportMeta = await page
       .locator('meta[name="viewport"]')
@@ -121,6 +143,23 @@ test.describe("mobile UI", () => {
 
     const backLinkBox = await page.locator(".overlay a").boundingBox();
     expect(backLinkBox?.height ?? 0).toBeGreaterThanOrEqual(44);
+  }
+
+  test("MindAR Pokemon cards page is mobile-first", async ({ page }) => {
+    await expectMobileArBaseline("/ar/pokemon-cards.html", page);
+  });
+
+  test("MindAR interactive book page is mobile-first", async ({ page }) => {
+    await expectMobileArBaseline("/ar/interactive-book.html", page);
+  });
+
+  test("MindAR business card page is mobile-first", async ({ page }) => {
+    await expectMobileArBaseline("/ar/business-card.html", page);
+  });
+
+  test("legacy mindar route redirects to pokemon cards", async ({ page }) => {
+    await page.goto("/mindar.html");
+    await expect(page).toHaveURL(/\/ar\/pokemon-cards\.html$/);
   });
 
   test("WebXR placement page is mobile-first", async ({ page }) => {

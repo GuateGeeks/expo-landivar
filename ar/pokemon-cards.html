@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>MindAR - Pokemon Cards</title>
+
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 10;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+        padding: calc(0.4rem + env(safe-area-inset-top))
+          calc(0.7rem + env(safe-area-inset-right)) 0.4rem
+          calc(0.7rem + env(safe-area-inset-left));
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(8px);
+        color: white;
+      }
+
+      .overlay a {
+        color: white;
+        text-decoration: none;
+        font-size: 0.78rem;
+        font-weight: 500;
+        padding: 0.35rem 0.65rem;
+        border-radius: 999px;
+        min-height: 34px;
+        display: inline-flex;
+        align-items: center;
+      }
+
+      .overlay h1 {
+        font-size: 0.88rem;
+        font-weight: 600;
+        margin: 0;
+        max-width: 65vw;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .instructions {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: calc(0.4rem + env(safe-area-inset-bottom));
+        z-index: 10;
+        width: min(92vw, 520px);
+        padding: 0.55rem 0.75rem;
+        border-radius: 0.75rem;
+        background: rgba(0, 0, 0, 0.62);
+        backdrop-filter: blur(8px);
+        color: white;
+        text-align: center;
+        font-size: 0.74rem;
+        line-height: 1.35;
+        box-sizing: border-box;
+      }
+
+      .a-enter-vr {
+        display: none !important;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="overlay">
+      <a href="./index.html">Back</a>
+      <h1>MindAR - Pokemon Cards</h1>
+    </div>
+
+    <div class="instructions">Scan Pokemon cards to see 3D overlays.</div>
+
+    <a-scene
+      mindar-image="imageTargetSrc: ../mindar/cards.mind; maxTrack: 4; filterMinCF: 0.0005; filterBeta: 0.0005;"
+      color-space="sRGB"
+      renderer="colorManagement: true; physicallyCorrectLights: true;"
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: false"
+    >
+      <a-assets>
+        <img id="card-bulbasaur" src="../mindar/cards/bulbasaur.jpg" />
+        <img id="card-charmander" src="../mindar/cards/charmander.jpg" />
+        <img id="card-squirtle" src="../mindar/cards/squirtle.jpg" />
+        <img id="card-pikachu" src="../mindar/cards/pikachu.jpg" />
+        <a-asset-item
+          id="model-charmander"
+          src="../models/pokemon/charmander.glb"
+        ></a-asset-item>
+        <a-asset-item
+          id="model-squirtle"
+          src="../models/pokemon/squirtle.glb"
+        ></a-asset-item>
+        <a-asset-item
+          id="model-bulbasaur"
+          src="../models/pokemon/bulbasaur.glb"
+        ></a-asset-item>
+        <a-asset-item
+          id="model-pikachu"
+          src="../models/pokemon/pikachu.glb"
+        ></a-asset-item>
+      </a-assets>
+
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+      <a-entity light="type: ambient; intensity: 0.75"></a-entity>
+      <a-entity
+        light="type: directional; intensity: 0.9"
+        position="0.5 1 1"
+      ></a-entity>
+
+      <a-entity mindar-image-target="targetIndex: 0">
+        <a-plane
+          src="#card-bulbasaur"
+          position="0 0 0.01"
+          width="1.0"
+          height="1.4"
+          material="shader: flat; side: double"
+        ></a-plane>
+        <a-gltf-model
+          src="#model-bulbasaur"
+          position="0 -0.16 0.03"
+          rotation="-90 0 180"
+          scale="0.8 0.8 0.8"
+        ></a-gltf-model>
+      </a-entity>
+
+      <a-entity mindar-image-target="targetIndex: 1">
+        <a-plane
+          src="#card-charmander"
+          position="0 0 0.01"
+          width="1.0"
+          height="1.4"
+          material="shader: flat; side: double"
+        ></a-plane>
+        <a-gltf-model
+          src="#model-charmander"
+          position="0.5 -0.16 0.03"
+          rotation="-90 0 180"
+          scale="0.7 0.7 0.7"
+        ></a-gltf-model>
+      </a-entity>
+
+      <a-entity mindar-image-target="targetIndex: 2">
+        <a-plane
+          src="#card-squirtle"
+          position="0 0 0.01"
+          width="1.0"
+          height="1.4"
+          material="shader: flat; side: double"
+        ></a-plane>
+        <a-gltf-model
+          src="#model-squirtle"
+          position="0 -0.16 0.03"
+          rotation="-90 0 180"
+          scale="0.9 0.9 0.9"
+        ></a-gltf-model>
+      </a-entity>
+
+      <a-entity mindar-image-target="targetIndex: 3">
+        <a-plane
+          src="#card-pikachu"
+          position="0 0 0.01"
+          width="1.0"
+          height="1.4"
+          material="shader: flat; side: double"
+        ></a-plane>
+        <a-gltf-model
+          src="#model-pikachu"
+          position="0 -0.5 0"
+          rotation="0 0 180"
+          scale="0.4 0.4 0.4"
+        ></a-gltf-model>
+      </a-entity>
+    </a-scene>
+  </body>
+</html>

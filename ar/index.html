@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>AR Experiences</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        background: radial-gradient(circle at top, #1f2937 0%, #030712 65%);
+        color: #f9fafb;
+      }
+
+      main {
+        width: min(920px, 100%);
+        margin: 0 auto;
+        padding: calc(1rem + env(safe-area-inset-top))
+          calc(1rem + env(safe-area-inset-right))
+          calc(1rem + env(safe-area-inset-bottom))
+          calc(1rem + env(safe-area-inset-left));
+      }
+
+      .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+
+      .back-link {
+        color: #f9fafb;
+        text-decoration: none;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 0 0.9rem;
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 1.1rem;
+      }
+
+      .description {
+        margin: 0 0 1rem;
+        font-size: 0.92rem;
+        color: #d1d5db;
+      }
+
+      .grid {
+        display: grid;
+        gap: 0.75rem;
+        grid-template-columns: 1fr;
+      }
+
+      .card {
+        text-decoration: none;
+        color: inherit;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 0.9rem;
+        padding: 0.9rem;
+        background: rgba(255, 255, 255, 0.04);
+        min-height: 44px;
+      }
+
+      .card span {
+        display: block;
+      }
+
+      .card-title {
+        font-size: 0.98rem;
+        font-weight: 600;
+      }
+
+      .card-subtitle {
+        margin-top: 0.35rem;
+        font-size: 0.84rem;
+        color: #d1d5db;
+      }
+
+      @media (min-width: 680px) {
+        .grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="top">
+        <a class="back-link" href="../">Back</a>
+        <h1>AR Experiences</h1>
+      </div>
+
+      <p class="description">Select an AR route to launch a camera experience.</p>
+
+      <div class="grid">
+        <a class="card" href="../arjs.html">
+          <span class="card-title">AR.js Marker Tracking</span>
+          <span class="card-subtitle">Hiro marker with anchored 3D content</span>
+        </a>
+        <a class="card" href="../aframe-placement.html">
+          <span class="card-title">A-Frame Markerless Placement</span>
+          <span class="card-subtitle">Place model relative to camera</span>
+        </a>
+        <a class="card" href="../webxr-placement.html">
+          <span class="card-title">WebXR Surface Placement</span>
+          <span class="card-subtitle">Hit-test reticle with tap-to-place</span>
+        </a>
+        <a class="card" href="./pokemon-cards.html">
+          <span class="card-title">MindAR Pokemon Cards</span>
+          <span class="card-subtitle">Multi-target card tracking with overlays</span>
+        </a>
+        <a class="card" href="./interactive-book.html">
+          <span class="card-title">MindAR Interactive Book</span>
+          <span class="card-subtitle">Starter template for book-page targets</span>
+        </a>
+        <a class="card" href="./business-card.html">
+          <span class="card-title">MindAR Business Card</span>
+          <span class="card-subtitle">Starter template for business-card targets</span>
+        </a>
+      </div>
+    </main>
+  </body>
+</html>

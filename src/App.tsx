@@ -12,6 +12,14 @@ interface DemoCard {
 
 const arExperiments: DemoCard[] = [
   {
+    title: "AR Menu",
+    href: `${baseUrl}ar/index.html`,
+    description:
+      "Centralized menu with links to all AR experiences, including AR.js, A-Frame, WebXR, and MindAR setups.",
+    marker: "Route selector",
+    tech: "Static HTML AR hub",
+  },
+  {
     title: "AR.js — Marker Tracking",
     href: `${baseUrl}arjs.html`,
     description:
@@ -36,11 +44,27 @@ const arExperiments: DemoCard[] = [
     tech: "A-Frame 1.6.0 + WebXR",
   },
   {
-    title: "MindAR — Image Tracking",
-    href: `${baseUrl}mindar.html`,
+    title: "MindAR — Pokemon Cards",
+    href: `${baseUrl}ar/pokemon-cards.html`,
     description:
-      "Uses MindAR with A-Frame to detect a card image and overlay a 3D model. Image tracking uses computer vision to recognize natural images without special markers.",
-    marker: "MindAR card image",
+      "Uses MindAR with A-Frame to detect Pokemon cards and overlay 3D models. This is the multi-target setup for card-based interactions.",
+    marker: "Pokemon card image targets",
+    tech: "A-Frame 1.6.0 + MindAR 1.2.5",
+  },
+  {
+    title: "MindAR — Interactive Book",
+    href: `${baseUrl}ar/interactive-book.html`,
+    description:
+      "MindAR starter scene for interactive-book pages. Replace target descriptors and overlays with your book-specific assets.",
+    marker: "Book page image targets",
+    tech: "A-Frame 1.6.0 + MindAR 1.2.5",
+  },
+  {
+    title: "MindAR — Business Card",
+    href: `${baseUrl}ar/business-card.html`,
+    description:
+      "MindAR starter scene for business cards. Replace target descriptors and overlays with your organization card assets.",
+    marker: "Business card image targets",
     tech: "A-Frame 1.6.0 + MindAR 1.2.5",
   },
 ];

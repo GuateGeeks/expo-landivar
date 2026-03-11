@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>MindAR - Interactive Book</title>
+
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 10;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+        padding: calc(0.4rem + env(safe-area-inset-top))
+          calc(0.7rem + env(safe-area-inset-right)) 0.4rem
+          calc(0.7rem + env(safe-area-inset-left));
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(8px);
+        color: white;
+      }
+
+      .overlay a {
+        color: white;
+        text-decoration: none;
+        font-size: 0.78rem;
+        font-weight: 500;
+        padding: 0.35rem 0.65rem;
+        border-radius: 999px;
+        min-height: 34px;
+        display: inline-flex;
+        align-items: center;
+      }
+
+      .overlay h1 {
+        font-size: 0.88rem;
+        font-weight: 600;
+        margin: 0;
+      }
+
+      .instructions {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: calc(0.4rem + env(safe-area-inset-bottom));
+        z-index: 10;
+        width: min(92vw, 520px);
+        padding: 0.55rem 0.75rem;
+        border-radius: 0.75rem;
+        background: rgba(0, 0, 0, 0.62);
+        backdrop-filter: blur(8px);
+        color: white;
+        text-align: center;
+        font-size: 0.74rem;
+        line-height: 1.35;
+        box-sizing: border-box;
+      }
+
+      .a-enter-vr {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="overlay">
+      <a href="./index.html">Back</a>
+      <h1>MindAR - Interactive Book</h1>
+    </div>
+
+    <div class="instructions">
+      Starter setup. Replace image targets with your interactive book pages.
+    </div>
+
+    <a-scene
+      mindar-image="imageTargetSrc: ../mindar/cards.mind; maxTrack: 1;"
+      color-space="sRGB"
+      renderer="colorManagement: true; physicallyCorrectLights: true;"
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: false"
+    >
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+      <a-entity light="type: ambient; intensity: 1"></a-entity>
+
+      <a-entity mindar-image-target="targetIndex: 0">
+        <a-plane
+          position="0 0 0"
+          width="1"
+          height="1.4"
+          color="#0b3a53"
+          opacity="0.82"
+        ></a-plane>
+        <a-text
+          value="Interactive Book\nTemplate"
+          align="center"
+          width="2"
+          color="#ffffff"
+          position="0 0 0.02"
+        ></a-text>
+      </a-entity>
+    </a-scene>
+  </body>
+</html>
