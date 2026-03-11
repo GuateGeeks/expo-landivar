@@ -190,7 +190,7 @@ export function MediaPipeApp() {
 
       {/* Top bar overlay — back link (left) + task name + status pill (right) */}
       <div className="top-bar">
-        <a href={baseUrl} className="back-link">
+        <a href={`${baseUrl}ai/index.html`} className="back-link">
           ← Back
         </a>
         <div className="top-bar-right">

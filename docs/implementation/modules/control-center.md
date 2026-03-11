@@ -8,15 +8,15 @@ A centralized viewer page that displays live video streams from connected MediaP
 
 ```
 Publisher (MediaPipeApp)          Signaling Server         Control Center
-/mediapipe.html                   server/signaling.ts      /control-center.html
-                                  
+/ai/mediapipe.html                server/signaling.ts      /control-center.html
+
 camera → MediaPipe → canvas  ──► WebSocket HELLO ──────►  WebSocket HELLO
 canvas.captureStream(15)         (role: publisher)         (role: viewer)
-                                                           
+
                               ◄── SDP_OFFER ◄──────────── createOffer()
-setRemoteDescription()                                     
+setRemoteDescription()
 createAnswer() ──────────────►── SDP_ANSWER ──────────►   setRemoteDescription()
-                                                           
+
 ICE_CANDIDATE ◄──────────────►── ICE_CANDIDATE ──────►   ontrack → <video>
 ```
 
@@ -31,66 +31,66 @@ ICE_CANDIDATE ◄──────────────►── ICE_CANDIDA
 
 ### Infrastructure (signaling)
 
-| File | Purpose |
-|------|---------|
-| `src/infrastructure/signaling/types.ts` | `SignalMessage` discriminated union, `Role` type |
+| File                                              | Purpose                                                    |
+| ------------------------------------------------- | ---------------------------------------------------------- |
+| `src/infrastructure/signaling/types.ts`           | `SignalMessage` discriminated union, `Role` type           |
 | `src/infrastructure/signaling/SignalingClient.ts` | WebSocket client with auto-reconnect (exponential backoff) |
-| `src/infrastructure/signaling/index.ts` | Public module exports |
+| `src/infrastructure/signaling/index.ts`           | Public module exports                                      |
 
 ### Shared utilities
 
-| File | Purpose |
-|------|---------|
-| `src/shared/webrtc/rtcConfig.ts` | Default STUN server configuration |
-| `src/shared/webrtc/createPeerConnection.ts` | `RTCPeerConnection` factory |
-| `src/shared/webrtc/index.ts` | Public module exports |
-| `src/shared/utils/clientId.ts` | Persistent peer identifier via `crypto.randomUUID()` |
+| File                                        | Purpose                                              |
+| ------------------------------------------- | ---------------------------------------------------- |
+| `src/shared/webrtc/rtcConfig.ts`            | Default STUN server configuration                    |
+| `src/shared/webrtc/createPeerConnection.ts` | `RTCPeerConnection` factory                          |
+| `src/shared/webrtc/index.ts`                | Public module exports                                |
+| `src/shared/utils/clientId.ts`              | Persistent peer identifier via `crypto.randomUUID()` |
 
 ### Control Center (viewer)
 
-| File | Purpose |
-|------|---------|
-| `control-center.html` | MPA entry point |
-| `src/control-center/main.tsx` | React entry — mounts `ControlCenterPage` |
-| `src/control-center/ControlCenterPage.tsx` | Grid viewer, peer connection management |
-| `src/control-center/ControlCenterPage.css` | Tile grid styles, status badges |
-| `src/control-center/VideoTile.tsx` | `<video>` component with `srcObject` binding |
+| File                                       | Purpose                                      |
+| ------------------------------------------ | -------------------------------------------- |
+| `control-center.html`                      | MPA entry point                              |
+| `src/control-center/main.tsx`              | React entry — mounts `ControlCenterPage`     |
+| `src/control-center/ControlCenterPage.tsx` | Grid viewer, peer connection management      |
+| `src/control-center/ControlCenterPage.css` | Tile grid styles, status badges              |
+| `src/control-center/VideoTile.tsx`         | `<video>` component with `srcObject` binding |
 
 ### Publisher (broadcast hook)
 
-| File | Purpose |
-|------|---------|
-| `src/mediapipe/shared/useBroadcast.ts` | Hook: signaling + WebRTC publisher logic |
-| `src/mediapipe/MediaPipeApp.tsx` | Updated: broadcast toggle, "EN VIVO" indicator |
-| `src/mediapipe/MediaPipeApp.css` | Updated: broadcast control styles |
+| File                                   | Purpose                                        |
+| -------------------------------------- | ---------------------------------------------- |
+| `src/mediapipe/shared/useBroadcast.ts` | Hook: signaling + WebRTC publisher logic       |
+| `src/mediapipe/MediaPipeApp.tsx`       | Updated: broadcast toggle, "EN VIVO" indicator |
+| `src/mediapipe/MediaPipeApp.css`       | Updated: broadcast control styles              |
 
 ### Signaling server (development)
 
-| File | Purpose |
-|------|---------|
+| File                  | Purpose                                       |
+| --------------------- | --------------------------------------------- |
 | `server/signaling.ts` | Minimal Node.js WebSocket server (~120 lines) |
-| `server/package.json` | Server dependencies (`ws`) |
+| `server/package.json` | Server dependencies (`ws`)                    |
 
 ### Configuration
 
-| File | Purpose |
-|------|---------|
-| `.env.example` | `VITE_SIGNALING_URL`, `VITE_ROOM_ID` |
-| `vite.config.ts` | Updated: `control-center` MPA entry |
-| `package.json` | Updated: `dev:signaling` script |
+| File             | Purpose                              |
+| ---------------- | ------------------------------------ |
+| `.env.example`   | `VITE_SIGNALING_URL`, `VITE_ROOM_ID` |
+| `vite.config.ts` | Updated: `control-center` MPA entry  |
+| `package.json`   | Updated: `dev:signaling` script      |
 
 ## Signaling Message Contract
 
-| Type | Direction | Payload |
-|------|-----------|---------|
-| `HELLO` | Client → Server | `{ role, displayName }` |
-| `PUBLISHER_LIST` | Server → Viewer | `{ publishers: [{ clientId, displayName, ts }] }` |
-| `PUBLISHER_JOIN` | Server → All | `{ clientId, displayName, ts }` |
-| `PUBLISHER_LEAVE` | Server → All | `{ clientId, ts }` |
-| `SDP_OFFER` | Viewer → Publisher | `{ sdp }` |
-| `SDP_ANSWER` | Publisher → Viewer | `{ sdp }` |
-| `ICE_CANDIDATE` | Bidirectional | `{ candidate }` |
-| `ERROR` | Server → Client | `{ message }` |
+| Type              | Direction          | Payload                                           |
+| ----------------- | ------------------ | ------------------------------------------------- |
+| `HELLO`           | Client → Server    | `{ role, displayName }`                           |
+| `PUBLISHER_LIST`  | Server → Viewer    | `{ publishers: [{ clientId, displayName, ts }] }` |
+| `PUBLISHER_JOIN`  | Server → All       | `{ clientId, displayName, ts }`                   |
+| `PUBLISHER_LEAVE` | Server → All       | `{ clientId, ts }`                                |
+| `SDP_OFFER`       | Viewer → Publisher | `{ sdp }`                                         |
+| `SDP_ANSWER`      | Publisher → Viewer | `{ sdp }`                                         |
+| `ICE_CANDIDATE`   | Bidirectional      | `{ candidate }`                                   |
+| `ERROR`           | Server → Client    | `{ message }`                                     |
 
 ## How to Verify
 
@@ -104,7 +104,7 @@ npm run dev:signaling
 npm run dev
 
 # Browser tab 1: Open publisher
-# http://localhost:5173/mediapipe.html
+# http://localhost:5173/ai/mediapipe.html
 # → Select a task → Start → Click "📡 Broadcast"
 
 # Browser tab 2: Open Control Center
@@ -122,7 +122,7 @@ npm run build
 ### Cross-device testing
 
 1. Start signaling server and Vite on a machine accessible on the local network
-2. Open `/mediapipe.html` on a phone (HTTPS required — use `vite --host`)
+2. Open `/ai/mediapipe.html` on a phone (HTTPS required — use `vite --host`)
 3. Start a vision task and enable broadcasting
 4. Open `/control-center.html` on a laptop
 5. The phone's camera + AI overlay should appear in the grid

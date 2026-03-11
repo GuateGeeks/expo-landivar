@@ -35,7 +35,7 @@ test.describe("mobile UI", () => {
   });
 
   test("MediaPipe page has fullscreen overlay layout", async ({ page }) => {
-    await page.goto("/mediapipe.html");
+    await page.goto("/ai/mediapipe.html");
 
     // Top-bar overlay is present
     const topBar = page.locator(".top-bar");
@@ -128,6 +128,17 @@ test.describe("mobile UI", () => {
     await expect(page.locator('a[href="./business-card.html"]')).toBeVisible();
   });
 
+  test("AI index menu lists AI options", async ({ page }) => {
+    await page.goto("/ai/index.html");
+
+    const viewportMeta = await page
+      .locator('meta[name="viewport"]')
+      .getAttribute("content");
+    expect(viewportMeta ?? "").toContain("viewport-fit=cover");
+
+    await expect(page.locator('a[href="./mediapipe.html"]')).toBeVisible();
+  });
+
   async function expectMobileArBaseline(path: string, page: Page) {
     await page.goto(path);
 
@@ -160,6 +171,11 @@ test.describe("mobile UI", () => {
   test("legacy mindar route redirects to pokemon cards", async ({ page }) => {
     await page.goto("/mindar.html");
     await expect(page).toHaveURL(/\/ar\/pokemon-cards\.html$/);
+  });
+
+  test("legacy mediapipe route redirects to ai mediapipe", async ({ page }) => {
+    await page.goto("/mediapipe.html");
+    await expect(page).toHaveURL(/\/ai\/mediapipe\.html$/);
   });
 
   test("WebXR placement page is mobile-first", async ({ page }) => {

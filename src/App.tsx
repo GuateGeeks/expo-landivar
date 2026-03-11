@@ -71,8 +71,15 @@ const arExperiments: DemoCard[] = [
 
 const mlExperiments: DemoCard[] = [
   {
+    title: "AI Menu",
+    href: `${baseUrl}ai/index.html`,
+    description: "Centralized menu with links to AI-powered routes and demos.",
+    marker: "Route selector",
+    tech: "Static HTML AI hub",
+  },
+  {
     title: "MediaPipe Vision",
-    href: `${baseUrl}mediapipe.html`,
+    href: `${baseUrl}ai/mediapipe.html`,
     description:
       "7 real-time AI vision tasks: face detection, face mesh, hand tracking, gesture recognition, pose detection, object detection, and image classification — all running in the browser via WebAssembly.",
     marker: "Live camera feed",

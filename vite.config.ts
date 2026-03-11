@@ -17,6 +17,8 @@ export default defineConfig({
         "ar-pokemon-cards": resolve(__dirname, "ar/pokemon-cards.html"),
         "ar-interactive-book": resolve(__dirname, "ar/interactive-book.html"),
         "ar-business-card": resolve(__dirname, "ar/business-card.html"),
+        "ai-index": resolve(__dirname, "ai/index.html"),
+        "ai-mediapipe": resolve(__dirname, "ai/mediapipe.html"),
         "webxr-placement": resolve(__dirname, "webxr-placement.html"),
         mediapipe: resolve(__dirname, "mediapipe.html"),
         "control-center": resolve(__dirname, "control-center.html"),

@@ -13,7 +13,8 @@ import { VideoTile } from "./VideoTile.tsx";
 import "./ControlCenterPage.css";
 
 const SIGNALING_URL =
-  (import.meta.env.VITE_SIGNALING_URL as string) || "wss://socket.adawolfs.com/ws";
+  (import.meta.env.VITE_SIGNALING_URL as string) ||
+  "wss://socket.adawolfs.com/ws";
 const ROOM_ID = (import.meta.env.VITE_ROOM_ID as string) || "default";
 const baseUrl = import.meta.env.BASE_URL;
 
@@ -220,8 +221,8 @@ export function ControlCenterPage() {
         <div className="empty-state">
           <p>No publishers connected yet.</p>
           <p className="hint">
-            Open <a href={`${baseUrl}mediapipe.html`}>mediapipe.html</a> on
-            another device, start a task, and enable broadcasting.
+            Open <a href={`${baseUrl}ai/mediapipe.html`}>ai/mediapipe.html</a>{" "}
+            on another device, start a task, and enable broadcasting.
           </p>
         </div>
       ) : (

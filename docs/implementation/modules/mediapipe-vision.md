@@ -22,7 +22,9 @@ Includes an optional **broadcast mode** that streams the canvas (video + AI over
 
 | File                                            | Purpose                                                                  |
 | ----------------------------------------------- | ------------------------------------------------------------------------ |
-| `mediapipe.html`                                | MPA entry point (minimal HTML shell)                                     |
+| `ai/mediapipe.html`                             | MPA entry point (minimal HTML shell)                                     |
+| `ai/index.html`                                 | AI menu route with links to AI experiences                               |
+| `mediapipe.html`                                | Legacy compatibility route that redirects to `ai/mediapipe.html`         |
 | `src/mediapipe/main.tsx`                        | React entry — mounts `MediaPipeApp`                                      |
 | `src/mediapipe/MediaPipeApp.tsx`                | Main component: viewport, overlays, carousel, record ring, action floats |
 | `src/mediapipe/MediaPipeApp.css`                | Page styles (top bar, status pill, record ring, action floats)           |
@@ -110,19 +112,21 @@ WASM runtime is loaded from `cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest
 ```bash
 npm run dev
 # Visit http://localhost:5173/              → navigation hub
-# Visit http://localhost:5173/mediapipe.html → MediaPipe vision demos
+# Visit http://localhost:5173/ai/index.html     → AI route menu
+# Visit http://localhost:5173/ai/mediapipe.html → MediaPipe vision demos
 ```
 
 ### Production build
 
 ```bash
 npm run build
-# Verify output includes: dist/mediapipe.html
+# Verify output includes: dist/ai/index.html
+# Verify output includes: dist/ai/mediapipe.html
 ```
 
 ### Per-task verification
 
-1. Open `/mediapipe.html`
+1. Open `/ai/mediapipe.html`
 2. Swipe the carousel until a task icon snaps into the center ring (activation starts after a short delay)
 3. Wait for model download (first time may take a few seconds)
 4. Verify visual output appears on the camera feed:
@@ -139,7 +143,7 @@ npm run build
 ### Broadcast verification
 
 1. Start the signaling server: `npm run dev:signaling`
-2. Open `/mediapipe.html`, start any task
+2. Open `/ai/mediapipe.html`, start any task
 3. Tap the record ring → should see "🔴 EN VIVO"
 4. Open `/control-center.html` in another tab → publisher should appear
 
