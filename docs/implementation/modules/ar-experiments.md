@@ -9,27 +9,27 @@ Six standalone AR demo pages that serve as base configurations for augmented rea
 3. **WebXR Surface Placement** — Uses WebXR immersive AR hit-test to place the Magnemite model on detected surfaces with a reticle, tap-to-place, drag-to-move, and reset controls. AR session auto-starts on page load.
 4. **MindAR Pokemon Cards** — Multi-target image tracking for Pokemon cards with per-card 3D overlays.
 5. **MindAR Interactive Book (starter)** — Starter image-tracking scene for book-page targets.
-6. **MindAR Business Card (starter)** — Starter image-tracking scene for business-card targets.
+6. **MindAR Business Card** — Image-tracking scene with a spinning Landivar GLTF logo, tuned lighting, and target-anchored 3D link buttons.
 
 All pages launch the device camera, run AR detection or placement logic, and render 3D content in real-time. The overlays are tuned for mobile: safe-area padding, tap-target sizing, and `viewport-fit=cover`.
 
 ## Where It Lives
 
-| File                                                  | Purpose                                                              |
-| ----------------------------------------------------- | -------------------------------------------------------------------- |
-| `arjs.html`                                           | AR.js-next marker-based demo (standalone HTML + Three.js)            |
-| `aframe-placement.html`                               | A-Frame markerless placement demo (standalone HTML)                  |
-| `webxr-placement.html`                                | WebXR placement demo (standalone HTML)                               |
-| `mindar.html`                                         | Legacy compatibility route that redirects to `ar/pokemon-cards.html` |
-| `ar/index.html`                                       | AR menu route with links to all AR experiences                       |
-| `ar/pokemon-cards.html`                               | MindAR Pokemon cards demo (standalone HTML)                          |
-| `ar/interactive-book.html`                            | MindAR interactive-book starter (standalone HTML)                    |
-| `ar/business-card.html`                               | MindAR business-card starter (standalone HTML)                       |
-| `public/assets/vendor/arjs-next/data/camera_para.dat` | ARToolKit camera parameters (binary, ~176 bytes)                     |
-| `public/assets/vendor/arjs-next/data/patt.hiro`       | Hiro marker pattern file (~12 KB)                                    |
-| `vite.config.ts`                                      | MPA build config — registers AR pages as entry points                |
-| `src/App.tsx`                                         | Navigation hub with links to all AR pages                            |
-| `src/App.css`                                         | Card grid layout for the navigation hub                              |
+| File                                                  | Purpose                                                                           |
+| ----------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `arjs.html`                                           | AR.js-next marker-based demo (standalone HTML + Three.js)                         |
+| `aframe-placement.html`                               | A-Frame markerless placement demo (standalone HTML)                               |
+| `webxr-placement.html`                                | WebXR placement demo (standalone HTML)                                            |
+| `mindar.html`                                         | Legacy compatibility route that redirects to `ar/pokemon-cards.html`              |
+| `ar/index.html`                                       | AR menu route with links to all AR experiences                                    |
+| `ar/pokemon-cards.html`                               | MindAR Pokemon cards demo (standalone HTML)                                       |
+| `ar/interactive-book.html`                            | MindAR interactive-book starter (standalone HTML)                                 |
+| `ar/business-card.html`                               | MindAR business-card spinning logo + in-scene link buttons demo (standalone HTML) |
+| `public/assets/vendor/arjs-next/data/camera_para.dat` | ARToolKit camera parameters (binary, ~176 bytes)                                  |
+| `public/assets/vendor/arjs-next/data/patt.hiro`       | Hiro marker pattern file (~12 KB)                                                 |
+| `vite.config.ts`                                      | MPA build config — registers AR pages as entry points                             |
+| `src/App.tsx`                                         | Navigation hub with links to all AR pages                                         |
+| `src/App.css`                                         | Card grid layout for the navigation hub                                           |
 
 ## Architecture Decisions
 
@@ -93,7 +93,7 @@ npm run dev
 # Visit http://localhost:5173/ar/index.html         → AR route menu
 # Visit http://localhost:5173/ar/pokemon-cards.html   → MindAR Pokemon Cards
 # Visit http://localhost:5173/ar/interactive-book.html → MindAR Interactive Book (starter)
-# Visit http://localhost:5173/ar/business-card.html    → MindAR Business Card (starter)
+# Visit http://localhost:5173/ar/business-card.html    → MindAR Business Card (spinning logo)
 ```
 
 ### Production build
@@ -144,11 +144,22 @@ npm run build
 2. Display the [MindAR card image](https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/card.png)
 3. Point camera at the card → a card overlay and animated 3D model should appear
 
-### MindAR starter pages verification
+### MindAR interactive-book starter verification
 
-1. Open `/ar/interactive-book.html` and `/ar/business-card.html`
+1. Open `/ar/interactive-book.html`
 2. Confirm camera session opens and an overlay appears when a known image target is detected
 3. Replace `imageTargetSrc` and associated overlays with project-specific targets/assets
+
+### MindAR business-card verification
+
+1. Open `/ar/business-card.html` on a device with a camera (HTTPS required)
+2. Show the Landivar business-card target image to the camera
+3. Confirm the GLTF logo appears and continuously spins in place
+4. Confirm three floating in-scene link buttons appear only while the target is tracked
+5. Tap each button and confirm it opens:
+   - `https://principal.url.edu.gt/`
+   - `https://www.facebook.com/UniversidadRafaelLandivar/`
+   - `https://www.instagram.com/u_landivar/`
 
 ## Requirements
 
@@ -159,7 +170,7 @@ npm run build
 
 ## Status
 
-Implemented — AR.js, A-Frame markerless, WebXR, and MindAR Pokemon cards are functional. Interactive-book and business-card MindAR pages are starter templates for dedicated target files.
+Implemented — AR.js, A-Frame markerless, WebXR, and MindAR Pokemon cards are functional. Interactive-book is a starter template; business-card includes a spinning GLTF logo and target-aware in-scene link buttons.
 
 ### Not Yet Implemented
 

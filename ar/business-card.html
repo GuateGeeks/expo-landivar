@@ -72,6 +72,7 @@
         font-size: 0.74rem;
         line-height: 1.35;
         box-sizing: border-box;
+        pointer-events: none;
       }
 
       .a-enter-vr {
@@ -86,34 +87,129 @@
     </div>
 
     <div class="instructions">
-      Starter setup. Replace image targets with your business card descriptors.
+      Point your camera at the Landivar business card and tap a floating link.
     </div>
 
     <a-scene
-      mindar-image="imageTargetSrc: ../mindar/cards.mind; maxTrack: 1;"
+      mindar-image="imageTargetSrc: ../mindar/landivar.mind; maxTrack: 1;"
       color-space="sRGB"
       renderer="colorManagement: true; physicallyCorrectLights: true;"
       vr-mode-ui="enabled: false"
       device-orientation-permission-ui="enabled: false"
     >
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-      <a-entity light="type: ambient; intensity: 1"></a-entity>
+      <a-camera
+        position="0 0 0"
+        look-controls="enabled: false"
+        cursor="rayOrigin: mouse"
+        raycaster="objects: .cta-hitbox; far: 10"
+      ></a-camera>
+      <a-entity light="type: ambient; intensity: 0.45; color: #f6f9ff"></a-entity>
+      <a-entity
+        light="type: directional; intensity: 1.1; color: #ffffff"
+        position="0.9 1.6 1"
+      ></a-entity>
+      <a-entity
+        light="type: directional; intensity: 0.65; color: #7bc9ff"
+        position="-1.4 0.9 -0.8"
+      ></a-entity>
 
-      <a-entity mindar-image-target="targetIndex: 1">
-        <a-plane
-          position="0 0 0"
-          width="1"
-          height="0.6"
-          color="#1f2937"
-          opacity="0.9"
-        ></a-plane>
-        <a-text
-          value="Business Card\nTemplate"
-          align="center"
-          width="2"
-          color="#ffffff"
-          position="0 0 0.02"
-        ></a-text>
+      <a-assets>
+        <a-asset-item
+          id="model-landivar"
+          src="../models/landivar.glb"
+        ></a-asset-item>
+        <img
+          id="web-icon"
+          src="../img/web-icon.png"
+        >
+      </a-assets>
+
+      <a-entity id="business-card-target" mindar-image-target="targetIndex: 0">
+        <a-entity
+          position="0 -0.8 0"
+          animation__spin="property: rotation; to: 0 360 0; dur: 6800; easing: linear; loop: true"
+        >
+          <a-entity scale="20 20 20">
+            <a-gltf-model src="#model-landivar"></a-gltf-model>
+          </a-entity>
+        </a-entity>
+
+        <a-entity id="cta-group" position="0 -1.32 0.08">
+          <a-entity
+            class="cta-hitbox"
+            position="0 0.32 0"
+            link="href: https://principal.url.edu.gt/; title: principal.url.edu.gt; image: #web-icon; on: click; visualAspectEnabled: false"
+          >
+            <a-entity
+              geometry="primitive: plane; width: 1.35; height: 0.28"
+              material="color: #ffffff; opacity: 0.95; side: double"
+            ></a-entity>
+            <a-entity
+              geometry="primitive: circle; radius: 0.14"
+              material="color: #ffffff; opacity: 0.95; side: double"
+              position="-0.675 0 0"
+            ></a-entity>
+            <a-entity
+              geometry="primitive: circle; radius: 0.14"
+              material="color: #ffffff; opacity: 0.95; side: double"
+              position="0.675 0 0"
+            ></a-entity>
+            <a-entity
+              text="value: principal.url.edu.gt; align: center; color: #0f172a; width: 2.6; wrapCount: 24"
+              position="0 0 0.01"
+            ></a-entity>
+          </a-entity>
+
+          <a-entity
+            class="cta-hitbox"
+            position="0 0 0"
+            link="href: https://www.facebook.com/UniversidadRafaelLandivar/; title: Facebook; on: click; visualAspectEnabled: false"
+          >
+            <a-entity
+              geometry="primitive: plane; width: 1.2; height: 0.28"
+              material="color: #ffffff; opacity: 0.95; side: double"
+            ></a-entity>
+            <a-entity
+              geometry="primitive: circle; radius: 0.14"
+              material="color: #ffffff; opacity: 0.95; side: double"
+              position="-0.6 0 0"
+            ></a-entity>
+            <a-entity
+              geometry="primitive: circle; radius: 0.14"
+              material="color: #ffffff; opacity: 0.95; side: double"
+              position="0.6 0 0"
+            ></a-entity>
+            <a-entity
+              text="value: Facebook; align: center; color: #0f172a; width: 2; wrapCount: 16"
+              position="0 0 0.01"
+            ></a-entity>
+          </a-entity>
+
+          <a-entity
+            class="cta-hitbox"
+            position="0 -0.32 0"
+            link="href: https://www.instagram.com/u_landivar/; title: Instagram; on: click; visualAspectEnabled: false"
+          >
+            <a-entity
+              geometry="primitive: plane; width: 1.2; height: 0.28"
+              material="color: #ffffff; opacity: 0.95; side: double"
+            ></a-entity>
+            <a-entity
+              geometry="primitive: circle; radius: 0.14"
+              material="color: #ffffff; opacity: 0.95; side: double"
+              position="-0.6 0 0"
+            ></a-entity>
+            <a-entity
+              geometry="primitive: circle; radius: 0.14"
+              material="color: #ffffff; opacity: 0.95; side: double"
+              position="0.6 0 0"
+            ></a-entity>
+            <a-entity
+              text="value: Instagram; align: center; color: #0f172a; width: 2; wrapCount: 16"
+              position="0 0 0.01"
+            ></a-entity>
+          </a-entity>
+        </a-entity>
       </a-entity>
     </a-scene>
   </body>

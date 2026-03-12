@@ -173,7 +173,7 @@
 
     <!-- Instructions -->
     <div class="instructions">
-      Tap Place to drop Magnemite in front of you. Drag on the scene to rotate
+      Tap Place to drop an object in front of you. Drag on the scene to rotate
       the model. This uses a camera video background with a 3D overlay, so
       placement is relative to the camera. Requires HTTPS or localhost.
       <p class="status" id="status">Requesting camera access...</p>
@@ -193,14 +193,14 @@
     >
       <a-assets>
         <a-asset-item
-          id="magnemite-model"
-          src="./models/pokemon_magnemite/scene.gltf"
+          id="landivar-model"
+          src="./models/landivar.glb"
         ></a-asset-item>
       </a-assets>
 
       <a-gltf-model
-        id="magnemite"
-        src="#magnemite-model"
+        id="landivar"
+        src="#landivar-model"
         position="0 -0.5 -2"
         rotation="0 0 0"
         scale="0.05 0.05 0.05"
@@ -256,7 +256,7 @@
         const sceneEl = document.querySelector("a-scene");
         const placeButton = document.getElementById("place-button");
         const resetButton = document.getElementById("reset-button");
-        const modelEl = document.getElementById("magnemite");
+        const modelEl = document.getElementById("landivar");
         const cameraEl = document.querySelector("[camera]");
 
         if (
