@@ -6,7 +6,7 @@ Six standalone AR demo pages that serve as base configurations for augmented rea
 
 1. **AR.js-next Marker Tracking** — Uses the AR.js-next ECS engine with ARToolKit WASM worker and Three.js renderer to detect a Hiro marker via the device camera and render a rotating Landivar GLB model anchored to it. Auto-starts on page load (no buttons).
 2. **A-Frame Markerless Placement** — Uses the device camera as a video background and places the Magnemite model relative to the camera with a slow auto-rotation (no marker, no surface hit-test).
-3. **WebXR Surface Placement** — Uses WebXR immersive AR hit-test to place the Magnemite model on detected surfaces with a reticle, tap-to-place, drag-to-move, and reset controls. AR session auto-starts on page load.
+3. **WebXR Surface Placement** — Uses WebXR immersive AR hit-test to place the Landivar model on detected surfaces with a reticle, tap-to-place, drag-to-move, and reset controls. AR session auto-starts on page load.
 4. **MindAR Pokemon Cards** — Multi-target image tracking for Pokemon cards with per-card 3D overlays.
 5. **MindAR Interactive Book (starter)** — Starter image-tracking scene for book-page targets.
 6. **MindAR Business Card** — Image-tracking scene with a spinning Landivar GLTF logo, tuned lighting, and target-anchored 3D link buttons.
@@ -133,7 +133,7 @@ npm run build
 1. Open `/webxr-placement.html` on a WebXR-capable device (HTTPS required)
 2. AR session auto-starts (tap **Start AR** as fallback if needed)
 3. Move the device until the teal reticle appears on the floor
-4. Tap **Place** → Magnemite appears floating above the reticle (~16cm scale)
+4. Tap **Place** → Landivar appears floating above the reticle
 5. Touch and drag on the screen → model follows the reticle to a new position
 6. Release → model stays at the new position
 7. Tap **Reset** → model disappears, scan and place again

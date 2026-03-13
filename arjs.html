@@ -183,7 +183,7 @@
       >
         Hiro marker
       </a>
-      to see the Landivar logo. Requires HTTPS or localhost.
+      to see a 3D box. Requires HTTPS or localhost.
     </div>
 
 
@@ -230,7 +230,6 @@
       } from "https://cdn.jsdelivr.net/npm/@ar-js-org/ar.js-next@0.2.0/dist/arjs-core.mjs";
 
       import * as THREE from "https://unpkg.com/three@0.182.0/build/three.module.js";
-      import { GLTFLoader } from "https://unpkg.com/three@0.182.0/examples/jsm/loaders/GLTFLoader.js";
 
       // --- DOM refs ---
       const statusEl = document.getElementById("status");
@@ -292,15 +291,15 @@
         }
       }
 
-      // --- Model rotation animation ---
-      function animateModel(model) {
+      // --- Cube rotation animation ---
+      function animateCube(cube) {
         const speed = (2 * Math.PI) / 4; // one full rotation in 4 seconds
         let lastTime = performance.now();
 
         function tick(now) {
           const dt = (now - lastTime) / 1000;
           lastTime = now;
-          model.rotation.y += speed * dt;
+          cube.rotation.y += speed * dt;
           requestAnimationFrame(tick);
         }
 
@@ -385,17 +384,7 @@
           cam.far = 5000;
           cam.updateProjectionMatrix();
 
-          // 6. Prepare Landivar model
-          const landivarUrl = new URL(
-            /* @vite-ignore */ "./models/landivar.glb",
-            import.meta.url
-          ).href;
-          const loader = new GLTFLoader();
-          const landivarTemplate = await new Promise((resolve, reject) => {
-            loader.load(landivarUrl, (gltf) => resolve(gltf.scene), undefined, reject);
-          });
-
-          // 7. Event bus — bridge ar:getMarker → content + ar:marker
+          // 6. Event bus — bridge ar:getMarker → content + ar:marker
           const bus = engine.eventBus;
 
           bus.on("ar:getMarker", (d) => {
@@ -408,17 +397,22 @@
                 "0"
             );
 
-            // Add Landivar model to anchor on first detection
+            // Add cube to anchor on first detection
             setTimeout(() => {
               const anchor = threePlugin.getAnchor(id);
               if (anchor && !anchor.userData._content) {
                 anchor.userData._content = true;
 
-                const model = landivarTemplate.clone(true);
-                model.position.set(0, 0.2, 0);
-                model.scale.set(0.6, 0.6, 0.6);
-                anchor.add(model);
-                animateModel(model);
+                const cube = new THREE.Mesh(
+                  new THREE.BoxGeometry(0.5, 0.5, 0.5),
+                  new THREE.MeshNormalMaterial({
+                    opacity: 0.85,
+                    transparent: true,
+                  })
+                );
+                cube.position.y = 0.25;
+                anchor.add(cube);
+                animateCube(cube);
 
                 // Hide status once content is visible
                 hideStatus();

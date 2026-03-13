@@ -169,8 +169,8 @@
     >
       <a-assets>
         <a-asset-item
-          id="magnemite-model"
-          src="./models/pokemon_magnemite/scene.gltf"
+          id="landivar-model"
+          src="./models/landivar.glb"
         ></a-asset-item>
       </a-assets>
 
@@ -187,11 +187,11 @@
       ></a-entity>
 
       <a-gltf-model
-        id="magnemite"
-        src="#magnemite-model"
+        id="landivar"
+        src="#landivar-model"
         position="0 0 -2"
         rotation="0 180 0"
-        scale="0.01 0.01 0.01"
+        scale="0.06 0.06 0.06"
         play-gltf-animation="clip: Take 001"
         visible="false"
       ></a-gltf-model>
@@ -320,7 +320,7 @@
         const placeButton = document.getElementById("place-button");
         const statusEl = document.getElementById("status");
         const reticle = document.getElementById("reticle");
-        const modelEl = document.getElementById("magnemite");
+        const modelEl = document.getElementById("landivar");
         const resetButton = document.getElementById("reset-button");
 
         let isPlaced = false;
