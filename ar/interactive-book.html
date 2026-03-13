@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <title>MindAR - Interactive Book</title>
+    <title>MindAR - Business Card</title>
 
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
@@ -72,6 +72,7 @@
         font-size: 0.74rem;
         line-height: 1.35;
         box-sizing: border-box;
+        pointer-events: none;
       }
 
       .a-enter-vr {
@@ -82,38 +83,53 @@
   <body>
     <div class="overlay">
       <a href="./index.html">Back</a>
-      <h1>MindAR - Interactive Book</h1>
+      <h1>MindAR - Business Card</h1>
     </div>
 
     <div class="instructions">
-      Starter setup. Replace image targets with your interactive book pages.
+      Point your camera at the Landivar business card and tap a floating link.
     </div>
 
     <a-scene
-      mindar-image="imageTargetSrc: ../mindar/cards.mind; maxTrack: 1;"
+      mindar-image="imageTargetSrc: ../mindar/guategeeks.mind; maxTrack: 10;"
       color-space="sRGB"
       renderer="colorManagement: true; physicallyCorrectLights: true;"
       vr-mode-ui="enabled: false"
       device-orientation-permission-ui="enabled: false"
     >
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-      <a-entity light="type: ambient; intensity: 1"></a-entity>
+      <a-camera
+        position="0 0 0"
+        look-controls="enabled: false"
+        cursor="rayOrigin: mouse"
+        raycaster="objects: .cta-hitbox; far: 10"
+      ></a-camera>
+      <a-entity light="type: ambient; intensity: 0.45; color: #f6f9ff"></a-entity>
+      <a-entity
+        light="type: directional; intensity: 1.1; color: #ffffff"
+        position="0.9 1.6 1"
+      ></a-entity>
+      <a-entity
+        light="type: directional; intensity: 0.65; color: #7bc9ff"
+        position="-1.4 0.9 -0.8"
+      ></a-entity>
 
-      <a-entity mindar-image-target="targetIndex: 0">
-        <a-plane
+      <a-assets>
+        <a-asset-item
+          id="model-totem"
+          src="../models/totem.glb"
+        ></a-asset-item>
+      </a-assets>
+
+      <a-entity id="business-card-target" mindar-image-target="targetIndex: 0">
+        <a-entity
           position="0 0 0"
-          width="1"
-          height="1.4"
-          color="#0b3a53"
-          opacity="0.82"
-        ></a-plane>
-        <a-text
-          value="Interactive Book\nTemplate"
-          align="center"
-          width="2"
-          color="#ffffff"
-          position="0 0 0.02"
-        ></a-text>
+          animation__spin="property: rotation; to: 0 0 360; dur: 6800; easing: linear; loop: true"
+        >
+          <a-entity scale="5 5 5" rotation="-90 0 0">
+            <a-gltf-model src="#model-totem"></a-gltf-model>
+          </a-entity>
+        </a-entity>
+
       </a-entity>
     </a-scene>
   </body>

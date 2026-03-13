@@ -4,8 +4,8 @@
 
 Six standalone AR demo pages that serve as base configurations for augmented reality integration:
 
-1. **AR.js-next Marker Tracking** — Uses the AR.js-next ECS engine with ARToolKit WASM worker and Three.js renderer to detect a Hiro marker via the device camera and render a rotating 3D cube anchored to it. Auto-starts on page load (no buttons).
-2. **A-Frame Markerless Placement** — Uses the device camera as a video background and places the Magnemite model relative to the camera (no marker, no surface hit-test).
+1. **AR.js-next Marker Tracking** — Uses the AR.js-next ECS engine with ARToolKit WASM worker and Three.js renderer to detect a Hiro marker via the device camera and render a rotating Landivar GLB model anchored to it. Auto-starts on page load (no buttons).
+2. **A-Frame Markerless Placement** — Uses the device camera as a video background and places the Magnemite model relative to the camera with a slow auto-rotation (no marker, no surface hit-test).
 3. **WebXR Surface Placement** — Uses WebXR immersive AR hit-test to place the Magnemite model on detected surfaces with a reticle, tap-to-place, drag-to-move, and reset controls. AR session auto-starts on page load.
 4. **MindAR Pokemon Cards** — Multi-target image tracking for Pokemon cards with per-card 3D overlays.
 5. **MindAR Interactive Book (starter)** — Starter image-tracking scene for book-page targets.
@@ -119,13 +119,13 @@ npm run build
 1. Open `/arjs.html` on a device with a camera (HTTPS required)
 2. Wait for status pill to show "Ready — show the Hiro marker"
 3. Print or display the [Hiro marker](https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png) on screen
-4. Point camera at the marker → a rotating 3D cube should appear anchored to the marker
+4. Point camera at the marker → the Landivar model should appear anchored to the marker and rotate
 5. The status pill hides once content is detected
 
 ### A-Frame markerless placement
 
 1. Open `/aframe-placement.html` on a device with a camera (HTTPS required)
-2. Tap **Place** → Magnemite appears in front of the camera
+2. Tap **Place** → Magnemite appears in front of the camera and slowly spins
 3. Tap **Reset** → Magnemite hides and can be placed again
 
 ### WebXR placement
@@ -174,5 +174,4 @@ Implemented — AR.js, A-Frame markerless, WebXR, and MindAR Pokemon cards are f
 
 ### Not Yet Implemented
 
-- GLTF model (Magnemite) on AR.js-next marker page (currently shows rotating cube)
 - TURN server support for restrictive NATs
