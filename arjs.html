@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <title>AR.js — Marker-Based Demo</title>
+    <title>AR.js — Marcador Hiro</title>
 
     <!-- Import map: Three.js bare specifier used by arjs-plugin-threejs -->
     <script type="importmap">
@@ -163,27 +163,27 @@
   <body>
     <!-- Navigation overlay -->
     <div class="overlay">
-      <a href="./ar/index.html">← Back</a>
-      <h1>AR.js — Marker Tracking</h1>
+      <a href="./ar/index.html">← Volver</a>
+      <h1>AR.js — Seguimiento de marcador</h1>
     </div>
 
     <!-- Status pill -->
-    <div id="status" class="status-pill">Initializing…</div>
+    <div id="status" class="status-pill">Inicializando…</div>
 
     <!-- Full-screen AR viewport (video + Three.js canvas injected here) -->
     <div id="viewport"></div>
 
     <!-- Instructions -->
     <div class="instructions">
-      Point your camera at a
+      Apunta la camara a un
       <a
         href="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png"
         target="_blank"
         rel="noopener noreferrer"
       >
-        Hiro marker
+        marcador Hiro
       </a>
-      to see a 3D box. Requires HTTPS or localhost.
+      para ver el logo de Landivar. Requiere HTTPS o localhost.
     </div>
 
 
@@ -332,7 +332,7 @@
           const ThreeJSRendererPlugin =
             threeMod.ThreeJSRendererPlugin || threeMod.default;
 
-          setStatus("Loading AR engine…");
+          setStatus("Cargando motor AR…");
 
           // 3. Enable core plugins
           const ctx = engine.getContext();
@@ -350,7 +350,7 @@
             await artoolkit.enable();
           } catch (e) {
             console.error("[ArtoolkitPlugin] init/enable failed:", e);
-            setStatus("AR engine failed to load", "error");
+            setStatus("El motor AR no pudo cargarse", "error");
             return;
           }
 
@@ -468,7 +468,7 @@
             }));
 
           if (!workerReady) {
-            setStatus("AR worker timed out", "error");
+          setStatus("El worker AR excedio el tiempo", "error");
             return;
           }
 
@@ -483,7 +483,7 @@
             /* ignore */
           }
 
-          setStatus("Starting camera…");
+          setStatus("Iniciando camara…");
 
           // 9. Start webcam
           await CaptureSystem.initialize(
@@ -499,17 +499,17 @@
           FramePumpSystem.start(ctx);
 
           // 10. Load Hiro marker
-          setStatus("Loading marker…");
+          setStatus("Cargando marcador…");
           await artoolkit.loadMarker(hiroUrl, 1);
 
-          setStatus("Ready — show the Hiro marker", "ready");
+          setStatus("Listo — muestra el marcador Hiro", "ready");
 
           // Auto-hide status after 4 seconds
           setTimeout(hideStatus, 4000);
         } catch (err) {
           console.error("[AR.js-next] bootstrap error:", err);
           setStatus(
-            "Failed to start: " + (err?.message || "Unknown error"),
+            "No se pudo iniciar: " + (err?.message || "Error desconocido"),
             "error"
           );
         }

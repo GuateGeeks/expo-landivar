@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <title>A-Frame — Markerless Placement</title>
+    <title>A-Frame — Colocacion libre</title>
 
     <!-- A-Frame 1.6.0 -->
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
@@ -167,19 +167,18 @@
   <body>
     <!-- Navigation overlay -->
     <div class="overlay" id="overlay">
-      <a href="./ar/index.html">← Back</a>
-      <h1>A-Frame — Markerless Placement</h1>
+      <a href="./ar/index.html">← Volver</a>
+      <h1>A-Frame — Colocacion libre</h1>
     </div>
 
     <!-- Instructions -->
     <div class="instructions">
-      Tap Place to drop an object in front of you. Drag on the scene to rotate
-      the model. This uses a camera video background with a 3D overlay, so
-      placement is relative to the camera. Requires HTTPS or localhost.
-      <p class="status" id="status">Requesting camera access...</p>
+      Toca Colocar para poner el modelo frente a ti. Arrastra la escena para
+      girarlo. La ubicacion es relativa a la camara. Requiere HTTPS o localhost.
+      <p class="status" id="status">Solicitando acceso a la camara...</p>
       <div class="actions">
-        <button id="place-button" type="button" disabled>Place</button>
-        <button id="reset-button" type="button" disabled>Reset</button>
+        <button id="place-button" type="button" disabled>Colocar</button>
+        <button id="reset-button" type="button" disabled>Reiniciar</button>
       </div>
     </div>
 
@@ -311,7 +310,7 @@
             videoEl.srcObject = stream;
             await videoEl.play();
             cameraReady = true;
-            updateStatus("Camera ready. Loading model...");
+            updateStatus("Camara lista. Cargando modelo...");
             syncControls();
 
             if (sceneEl.renderer) {
@@ -324,7 +323,7 @@
               });
             }
           } catch (error) {
-            updateStatus("Unable to access the camera.");
+            updateStatus("No se pudo acceder a la camara.");
             setControlsEnabled(false);
           }
         };
@@ -332,7 +331,7 @@
         const placeModel = () => {
           const cameraObject = sceneEl.camera;
           if (!cameraObject) {
-            updateStatus("Camera not ready yet.");
+            updateStatus("La camara aun no esta lista.");
             return;
           }
           const direction = new AFRAME.THREE.Vector3();
@@ -348,13 +347,13 @@
           modelEl.object3D.position.copy(position);
           modelEl.object3D.rotation.set(0, cameraObject.rotation.y + Math.PI, 0);
           modelEl.setAttribute("visible", "true");
-          updateStatus("Placed. Tap Place to reposition.");
+          updateStatus("Colocado. Toca Colocar para reubicar.");
           vibrate();
         };
 
         const resetModel = () => {
           modelEl.setAttribute("visible", "false");
-          updateStatus("Placement reset.");
+          updateStatus("Colocacion reiniciada.");
           vibrate();
         };
 
@@ -401,12 +400,12 @@
 
         modelEl.addEventListener("model-loaded", () => {
           modelReady = true;
-          updateStatus("Model ready. Tap Place.");
+          updateStatus("Modelo listo. Toca Colocar.");
           syncControls();
         });
 
         modelEl.addEventListener("model-error", () => {
-          updateStatus("Model failed to load.");
+          updateStatus("El modelo no pudo cargarse.");
           syncControls();
         });
 

@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <title>WebXR — Surface Placement</title>
+    <title>WebXR — Colocacion en superficie</title>
 
     <!-- A-Frame 1.6.0 (WebXR) -->
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
@@ -143,19 +143,19 @@
   <body>
     <!-- Navigation overlay -->
     <div id="ar-overlay">
-      <div class="overlay" id="overlay">
-        <a href="./ar/index.html">← Back</a>
-        <h1>WebXR — Surface Placement</h1>
+        <div class="overlay" id="overlay">
+        <a href="./ar/index.html">← Volver</a>
+        <h1>WebXR — Colocacion en superficie</h1>
       </div>
 
       <!-- Instructions -->
       <div class="instructions">
-        Aim at the floor and tap Place when the reticle appears. After placing, drag to move.
-        <p class="status" id="status">Checking WebXR support...</p>
+        Apunta al piso y toca Colocar cuando aparezca el reticulo. Luego arrastra para mover.
+        <p class="status" id="status">Verificando soporte WebXR...</p>
         <div class="actions">
-          <button id="start-ar" type="button">Start AR</button>
-          <button id="place-button" type="button" disabled>Place</button>
-          <button id="reset-button" type="button" disabled>Reset</button>
+          <button id="start-ar" type="button">Iniciar AR</button>
+          <button id="place-button" type="button" disabled>Colocar</button>
+          <button id="reset-button" type="button" disabled>Reiniciar</button>
         </div>
       </div>
     </div>
@@ -351,7 +351,7 @@
         };
 
         if (!navigator.xr || !navigator.xr.isSessionSupported) {
-          updateStatus("WebXR is not supported on this device.");
+          updateStatus("WebXR no es compatible con este dispositivo.");
           startButton.disabled = true;
           return;
         }
@@ -360,15 +360,15 @@
           .isSessionSupported("immersive-ar")
           .then((supported) => {
             if (!supported) {
-              updateStatus("WebXR immersive AR is not supported here.");
+                updateStatus("WebXR AR inmersivo no es compatible aqui.");
               startButton.disabled = true;
               return;
             }
 
-            updateStatus("WebXR ready. Tap Start AR.");
+              updateStatus("WebXR listo. Toca Iniciar AR.");
           })
           .catch(() => {
-            updateStatus("Unable to check WebXR support.");
+            updateStatus("No se pudo verificar el soporte WebXR.");
             startButton.disabled = true;
           });
 
@@ -379,7 +379,7 @@
 
           if (enterPromise && typeof enterPromise.catch === "function") {
             enterPromise.catch(() => {
-              updateStatus("Unable to start AR session.");
+              updateStatus("No se pudo iniciar la sesion AR.");
             });
           }
 
@@ -388,7 +388,7 @@
 
         sceneEl.addEventListener("enter-vr", () => {
           if (sceneEl.is("ar-mode")) {
-            updateStatus("Move your device to find the floor.");
+            updateStatus("Mueve tu dispositivo para encontrar el piso.");
             setPlacementEnabled(true);
           }
         });
@@ -401,7 +401,7 @@
             dragRafId = null;
           }
           if (resetButton) resetButton.disabled = true;
-          updateStatus("AR session ended.");
+          updateStatus("Sesion AR finalizada.");
           setPlacementEnabled(false);
           if (modelEl) {
             modelEl.setAttribute("visible", "false");
@@ -414,7 +414,7 @@
         placeButton.addEventListener("click", () => {
           if (!reticle || !modelEl) return;
           if (!reticle.object3D.visible) {
-            updateStatus("Reticle not found yet. Keep moving.");
+            updateStatus("No se encontro el reticulo. Sigue moviendote.");
             return;
           }
 
@@ -427,7 +427,7 @@
           modelEl.setAttribute("visible", "true");
           isPlaced = true;
           if (resetButton) resetButton.disabled = false;
-          updateStatus("Placed! Drag to move, or tap Place to reposition.");
+          updateStatus("Colocado. Arrastra para mover o toca Colocar para reubicar.");
           vibrate();
         });
 
@@ -441,7 +441,7 @@
             }
             if (modelEl) modelEl.setAttribute("visible", "false");
             resetButton.disabled = true;
-            updateStatus("Move your device to find the floor.");
+            updateStatus("Mueve tu dispositivo para encontrar el piso.");
             vibrate();
           });
         }
@@ -462,7 +462,7 @@
           if (e.target.tagName === "BUTTON" || e.target.tagName === "A") return;
           if (!isPlaced || !modelEl || !modelEl.object3D.visible) return;
           isDragging = true;
-          updateStatus("Dragging...");
+          updateStatus("Arrastrando...");
           dragLoop();
         });
 
@@ -473,7 +473,7 @@
             cancelAnimationFrame(dragRafId);
             dragRafId = null;
           }
-          updateStatus("Placed! Drag to move, or tap Place to reposition.");
+          updateStatus("Colocado. Arrastra para mover o toca Colocar para reubicar.");
         });
       });
     </script>
